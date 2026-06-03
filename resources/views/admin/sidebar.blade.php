@@ -185,6 +185,30 @@
                 </a>
             </li>
 
+            <!-- SYSTEM MANAGEMENT -->
+            <li class="menu-header">{{ __('System Management') }}</li>
+            <li class="dropdown-parent">
+                <a href="javascript:void(0);" class="dropdown-toggle" aria-expanded="false">
+                    <i class="fas fa-cogs"></i>
+                    <span>{{ __('System Records') }}</span>
+                    <i class="fas fa-chevron-right dropdown-arrow"></i>
+                </a>
+                <ul class="submenu">
+                    <li class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.users.index') }}">
+                            <i class="fas fa-user-friends"></i>
+                            <span>{{ __('Users') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.bookings.index') }}">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>{{ __('Bookings') }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
             <!-- ADMIN SETTINGS DROPDOWN -->
             @if(
                 $admin->can('role.view') ||

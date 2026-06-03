@@ -134,6 +134,9 @@ Route::prefix('staff')->name('staff.')->middleware([StaffAuthMiddleware::class, 
         
         Route::delete('shop-management/categories/{id}', [\App\Http\Controllers\Admin\ShopManagementController::class, 'destroy'])
             ->name('shop-categories.destroy');
+
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::resource('bookings', \App\Http\Controllers\Admin\BookingController::class)->only(['index', 'destroy']);
     });
 });
 
