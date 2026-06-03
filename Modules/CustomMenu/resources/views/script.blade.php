@@ -2,10 +2,10 @@
     var menus = {
         "deleteFailed" : '{{__("Delete Failed")}}',
         "updateFailed" : '{{__("Update Failed")}}',
-        "addItem" : '{{__("Item Added Successfully")}}',
+        "addItem" : '{{__("Created successfully")}}',
         "itemAddFailed" : '{{__("Item failed to add")}}',
-        "updateItem" : '{{__("Item Updated Successfully")}}',
-        "deleteItem" : '{{__("Item deleted successfully")}}',
+        "updateItem" : '{{__("Updated successfully")}}',
+        "deleteItem" : '{{__("Deleted successfully")}}',
         "deleteItemAlert" : '{{__("Do you want to delete this item ?")}}',
         "updated" : '{{__("Updated Successfully")}}',
         "failed" : '{{__("Operation Failed")}}',

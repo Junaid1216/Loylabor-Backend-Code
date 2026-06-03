@@ -133,7 +133,7 @@ class ProductController extends Controller
             DB::commit();
             if ($product->id) {
                 return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.product.edit', [$product->id], [
-                    'message'    => __('Product created successfully'),
+                    'message'    => __('Created successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {
@@ -314,7 +314,7 @@ class ProductController extends Controller
             DB::commit();
             if ($product->id) {
                 return $this->redirectWithMessage(RedirectType::UPDATE->value, 'admin.product.edit', ['product' => $product->id, 'code' => $code], [
-                    'message'    => __('Product updated successfully'),
+                    'message'    => __('Updated successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {
@@ -351,7 +351,7 @@ class ProductController extends Controller
             $product = $this->productService->deleteProduct($product);
             if ($product) {
                 return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.product.index', [], [
-                    'message'    => __('Product deleted successfully'),
+                    'message'    => __('Deleted successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {
@@ -421,7 +421,7 @@ class ProductController extends Controller
             DB::commit();
 
             return response()->json([
-                'message'    => __('Product images updated successfully'),
+                'message'    => __('Updated successfully'),
                 'alert-type' => 'success',
                 'url'        => route('admin.product-gallery', ['id' => $id]),
             ]);
@@ -456,7 +456,7 @@ class ProductController extends Controller
             DB::commit();
 
             return back()->with([
-                'message'    => __('Product image deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -565,7 +565,7 @@ class ProductController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.product.product-variant', [$product->id], [
-                'message'    => __('Product Variant created successfully'),
+                'message'    => __('Created successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -641,7 +641,7 @@ class ProductController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::UPDATE->value, 'admin.product.product-variant', [$variant->product->id], [
-                'message'    => __('Product Variant updated successfully'),
+                'message'    => __('Updated successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -673,7 +673,7 @@ class ProductController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.product.product-variant', [$variant->product->id], [
-                'message'    => __('Product Variant deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -699,7 +699,7 @@ class ProductController extends Controller
             DB::commit();
 
             return back()->with([
-                'message'    => __('Product Variant deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -815,7 +815,7 @@ class ProductController extends Controller
         $ids = $request->ids;
         $this->productService->bulkDelete($ids);
 
-        return response()->json(['status' => 'success', 'message' => 'Product Deleted Successfully']);
+        return response()->json(['status' => 'success', 'message' => 'Deleted successfully']);
     }
 
     public function priceUpdate()
@@ -1080,7 +1080,7 @@ class ProductController extends Controller
             $returnPolicies->delete();
 
             return back()->with([
-                'message'    => __('Return policy deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {

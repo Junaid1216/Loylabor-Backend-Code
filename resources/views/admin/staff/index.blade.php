@@ -194,7 +194,7 @@
                 },
                 success: function(response) {
                     if(response.success) {
-                        toastr.success('Status updated successfully');
+                        toastr.success('Updated successfully');
                     } else {
                         toastr.error('Something went wrong');
                         // Revert the toggle if failed

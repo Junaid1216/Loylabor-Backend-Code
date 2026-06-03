@@ -124,7 +124,7 @@ class AttributeService
                 $attribute->delete();
             }
 
-            return ['message' => 'Attribute deleted successfully', 'status' => true];
+            return ['message' => 'Deleted successfully', 'status' => true];
         } else {
             return ['message' => 'Attribute not found', 'status' => false];
         }

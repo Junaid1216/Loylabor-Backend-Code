@@ -79,7 +79,7 @@ class AdminNotificationController extends Controller
         self::forgetCache();
 
         return to_route('admin.notifications.index')->with([
-            'message' => 'Notification deleted successfully',
+            'message' => 'Deleted successfully',
             'alert-type' => 'success',
         ]);
     }
@@ -120,7 +120,7 @@ class AdminNotificationController extends Controller
         self::forgetCache();
 
         return back()->with([
-            'message' => $request->filled('ids') ? 'Selected notifications deleted successfully' : 'All notifications deleted successfully',
+            'message' => $request->filled('ids') ? 'Deleted successfully' : 'Deleted successfully',
             'alert-type' => 'success',
         ]);
     }

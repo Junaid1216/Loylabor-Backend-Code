@@ -55,7 +55,7 @@ class UnitTypeController extends Controller
             $unit = $this->unitTypeService->save($request);
 
             if ($request->ajax()) {
-                return response()->json(['message' => 'Unit created successfully', 'unit' => $unit, 'status' => 200], 200);
+                return response()->json(['message' => 'Created successfully', 'unit' => $unit, 'status' => 200], 200);
             }
 
             return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.unit.index');

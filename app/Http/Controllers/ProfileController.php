@@ -46,7 +46,7 @@ class ProfileController extends Controller
         $user->address = $request->address;
         $user->save();
 
-        $notification = __('Your profile updated successfully');
+        $notification = __('Updated successfully');
         $notification = ['message' => $notification, 'alert-type' => 'success'];
 
         return redirect()->back()->with($notification);

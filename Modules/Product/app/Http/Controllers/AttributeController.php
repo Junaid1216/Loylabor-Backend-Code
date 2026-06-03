@@ -57,7 +57,7 @@ class AttributeController extends Controller
             $this->attributeService->storeAttribute($request);
             DB::commit();
 
-            return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.attribute.index', [], ['message' => 'Attribute created successfully', 'alert-type' => 'success']);
+            return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.attribute.index', [], ['message' => 'Created successfully', 'alert-type' => 'success']);
         } catch (\Exception $ex) {
             DB::rollBack();
             Log::error($ex->getMessage());
@@ -126,7 +126,7 @@ class AttributeController extends Controller
             $attribute = $this->attributeService->deleteAttribute($id);
             DB::commit();
             if ($attribute['status'] == true) {
-                return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.attribute.index', [], ['message' => __('Attribute deleted successfully'), 'alert-type' => 'success']);
+                return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.attribute.index', [], ['message' => __('Deleted successfully'), 'alert-type' => 'success']);
             } else {
                 return $this->redirectWithMessage(RedirectType::ERROR->value, 'admin.attribute.index', [], ['message' => $attribute['message'], 'alert-type' => 'error']);
             }
@@ -163,7 +163,7 @@ class AttributeController extends Controller
             $this->attributeService->deleteValue($request->all());
             DB::commit();
 
-            return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.attribute.index', [], ['message' => __('Attribute value deleted successfully'), 'alert-type' => 'success']);
+            return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.attribute.index', [], ['message' => __('Deleted successfully'), 'alert-type' => 'success']);
         } catch (\Exception $ex) {
             DB::rollBack();
             Log::error($ex->getMessage());

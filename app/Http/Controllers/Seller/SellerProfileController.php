@@ -103,7 +103,7 @@ class SellerProfileController extends Controller
             $address->save();
         }
 
-        $message = __('Profile updated successfully');
+        $message = __('Updated successfully');
 
         if (strtolower($user->email) !== strtolower($request->email)) {
             $emailSend = false;

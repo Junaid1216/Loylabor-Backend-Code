@@ -143,7 +143,7 @@ class RolesController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Permissions updated successfully!'
+                'message' => 'Updated successfully'
             ]);
             
         } catch (\Exception $e) {

@@ -55,7 +55,7 @@
     -moz-box-sizing: border-box;
 }
 .dd-handle:hover {
-    color: #6777ef;
+    color: #FE7701;
     background: #fff;
 }
 
@@ -168,7 +168,7 @@
 }
 
 .dd-hover > .dd-handle {
-    background: #6777ef !important;
+    background: #FE7701 !important;
 }
 
 /**
@@ -193,7 +193,7 @@
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 .dd3-content:hover {
-    color: #6777ef;
+    color: #FE7701;
     background: #fff;
 }
 

@@ -139,7 +139,7 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Status updated successfully',
+            'message' => 'Updated successfully',
         ]);
     }
 }

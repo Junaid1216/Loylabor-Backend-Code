@@ -74,7 +74,7 @@ class CustomMenuController extends Controller
                 request(),
             );
 
-            return response()->json(['success' => true, 'message' => __('Item Added Successfully'), 'data' => ['id' => $menuItem->id, 'label' => $menuItem->label]]);
+            return response()->json(['success' => true, 'message' => __('Created successfully'), 'data' => ['id' => $menuItem->id, 'label' => $menuItem->label]]);
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => __('Item failed to add')]);
         }

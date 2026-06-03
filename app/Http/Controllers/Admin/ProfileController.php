@@ -88,7 +88,7 @@ class ProfileController extends Controller
             $admin->password = Hash::make($request->password);
             $admin->save();
 
-            $notification = __('Password updated successfully');
+            $notification = __('Updated successfully');
             $notification = ['message' => $notification, 'alert-type' => 'success'];
 
             return $this->redirectWithMessage(RedirectType::UPDATE->value, '', [], $notification);

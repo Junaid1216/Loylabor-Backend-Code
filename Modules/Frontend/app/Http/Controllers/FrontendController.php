@@ -47,7 +47,7 @@ class FrontendController extends Controller
 
             return back()->with([
                 'alert-type' => 'success',
-                'message'    => 'Homepage setting updated successfully',
+                'message'    => 'Updated successfully',
             ]);
         }
 
@@ -70,7 +70,7 @@ class FrontendController extends Controller
 
         return back()->with([
             'alert-type' => 'success',
-            'message'    => __('Homepage changed successfully'),
+            'message'    => __('Updated successfully'),
         ]);
     }
 
@@ -151,7 +151,7 @@ class FrontendController extends Controller
 
         return back()->with([
             'alert-type' => 'success',
-            'message'    => __('Section updated successfully'),
+            'message'    => __('Updated successfully'),
         ]);
     }
 

@@ -216,7 +216,7 @@ class ShopManagementController extends Controller
         $job->save();
         
         return response()->json([
-            'message' => 'Job status updated successfully!',
+            'message' => 'Updated successfully',
             'status' => $job->status
         ]);
     }
@@ -268,7 +268,7 @@ class ShopManagementController extends Controller
         'is_active' => $request->is_active
     ]);
 
-    return response()->json(['message' => 'Category created successfully!']);
+    return response()->json(['message' => 'Created successfully']);
 }
 
 // Status Update
@@ -279,7 +279,7 @@ public function updateStatus($id)
     $category->save();
     
     $status = $category->is_active ? 'activated' : 'deactivated';
-    return response()->json(['message' => "Status updated successfully"]);
+    return response()->json(['message' => "Updated successfully"]);
 }
 
 // Delete

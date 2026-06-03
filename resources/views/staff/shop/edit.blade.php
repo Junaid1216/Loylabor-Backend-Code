@@ -318,7 +318,7 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            toastr.success('Photo deleted successfully!', 'Success!');
+                            toastr.success('Deleted successfully', 'Success!');
                             setTimeout(function () {
                                 location.reload();
                             }, 1000);
@@ -358,7 +358,7 @@
                     success: function (response) {
                         console.log('Response:', response);
                         if (response.success) {
-                            toastr.success('Primary photo updated successfully!', 'Success!');
+                            toastr.success('Updated successfully', 'Success!');
                             setTimeout(function () {
                                 location.reload();
                             }, 1000);

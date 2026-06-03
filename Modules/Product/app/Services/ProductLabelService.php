@@ -109,7 +109,7 @@ class ProductLabelService
         if ($productLabel) {
             $productLabel->delete();
 
-            return ['message' => 'Product label deleted successfully', 'status' => true];
+            return ['message' => 'Deleted successfully', 'status' => true];
         } else {
             return ['message' => 'Product label not found', 'status' => false];
         }
@@ -124,6 +124,6 @@ class ProductLabelService
         $productLabel->status = $productLabel->status == 1 ? 0 : 1;
         $productLabel->save();
 
-        return ['message' => 'Product label status updated successfully', 'status' => true];
+        return ['message' => 'Updated successfully', 'status' => true];
     }
 }

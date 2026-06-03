@@ -304,7 +304,7 @@ class WalletController extends Controller
 
         return response()->json([
             'status'  => true,
-            'message' => __('Auto approve status updated successfully'),
+            'message' => __('Updated successfully'),
         ]);
     }
 }

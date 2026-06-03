@@ -43,7 +43,7 @@ public function store(Request $request)
     ]);
 
     return redirect()->route('admin.staff.index')
-        ->with('success', 'Staff member created successfully!');
+        ->with('success', 'Created successfully');
 }
 
 public function edit($id)

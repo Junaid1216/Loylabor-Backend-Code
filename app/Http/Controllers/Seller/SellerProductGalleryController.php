@@ -126,7 +126,7 @@ class SellerProductGalleryController extends Controller
             DB::commit();
 
             return back()->with([
-                'message'    => __('Product image deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {

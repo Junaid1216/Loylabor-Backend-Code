@@ -44,7 +44,7 @@ class ProductLabelController extends Controller
         $this->productLabelService->store($request);
 
         return $this->redirectWithMessage(RedirectMessage::CREATE->value, notification: [
-            'message'    => __('Product Label Created Successfully'),
+            'message'    => __('Created successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -71,7 +71,7 @@ class ProductLabelController extends Controller
         $this->productLabelService->update($request, $id);
 
         return $this->redirectWithMessage(RedirectMessage::UPDATE->value, notification: [
-            'message'    => __('Product Label Updated Successfully'),
+            'message'    => __('Updated successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -95,7 +95,7 @@ class ProductLabelController extends Controller
         $this->productLabelService->delete($id);
 
         return $this->redirectWithMessage(RedirectMessage::DELETE->value, notification: [
-            'message'    => __('Product Label Deleted Successfully'),
+            'message'    => __('Deleted successfully'),
             'alert-type' => 'success',
         ]);
     }

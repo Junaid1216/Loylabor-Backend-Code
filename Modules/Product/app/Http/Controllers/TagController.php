@@ -85,7 +85,7 @@ class TagController extends Controller
         );
 
         return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.product.tags.edit', ['tag' => $tag->id, 'code' => getSessionLanguage()], [
-            'message'    => 'Tag created successfully',
+            'message'    => 'Created successfully',
             'alert-type' => 'success',
         ]);
     }
@@ -158,7 +158,7 @@ class TagController extends Controller
         );
 
         return $this->redirectWithMessage(RedirectType::UPDATE->value, 'admin.product.tags.edit', ['tag' => $tag->id, 'code' => $code], [
-            'message'    => 'Tag updated successfully',
+            'message'    => 'Updated successfully',
             'alert-type' => 'success',
         ]);
     }
@@ -182,7 +182,7 @@ class TagController extends Controller
         $tag->delete();
 
         return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.product.tags.index', [], [
-            'message'    => 'Tag deleted successfully',
+            'message'    => 'Deleted successfully',
             'alert-type' => 'success',
         ]);
     }

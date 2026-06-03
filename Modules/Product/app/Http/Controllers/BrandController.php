@@ -72,11 +72,11 @@ class BrandController extends Controller
 
             if ($brand->id) {
                 if ($request->ajax()) {
-                    return response()->json(['message' => __('Brand created successfully'), 'status' => 200, 'brand' => $brand], 200);
+                    return response()->json(['message' => __('Created successfully'), 'status' => 200, 'brand' => $brand], 200);
                 }
 
                 return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.brand.edit', ['brand' => $brand->id, 'code' => getSessionLanguage()], [
-                    'message'    => __('Brand created successfully'),
+                    'message'    => __('Created successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {
@@ -140,7 +140,7 @@ class BrandController extends Controller
                     'brand' => $brand->id,
                     'code'  => $code,
                 ], [
-                    'message'    => __('Brand updated successfully'),
+                    'message'    => __('Updated successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {
@@ -179,7 +179,7 @@ class BrandController extends Controller
 
             if ($brand) {
                 return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.brand.index', [], [
-                    'message'    => __('Brand deleted successfully'),
+                    'message'    => __('Deleted successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {

@@ -13,7 +13,7 @@
         <link href="{{ asset('backend/css/style.css') }}?v={{ $setting?->version }}" rel="stylesheet">
         <link href="{{ asset('backend/css/bootstrap-social.css') }}" rel="stylesheet">
         <link href="{{ asset('backend/css/components.css') }}?v={{ $setting?->version }}" rel="stylesheet">
-        <link href="{{ asset('global/toastr/toastr.min.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="{{ asset('backend/css/iziToast.min.css') }}">
         <link href="{{ asset('backend/css/bootstrap4-toggle.min.css') }}" rel="stylesheet">
         <link href="{{ asset('backend/css/dev.css') }}?v={{ $setting?->version }}" rel="stylesheet">
         @if (session()->has('text_direction') && session()->get('text_direction') !== 'ltr')
@@ -44,8 +44,15 @@
         <script src="{{ asset('backend/js/moment.min.js') }}"></script>
         <script src="{{ asset('backend/js/stisla.js') }}"></script>
         <script src="{{ asset('backend/js/scripts.js') }}?v={{ $setting?->version }}"></script>
-        <script src="{{ asset('global/toastr/toastr.min.js') }}"></script>
-        <script src="{{ asset('backend/js/modules-toastr.js') }}"></script>
+        <script src="{{ asset('backend/js/iziToast.min.js') }}"></script>
+    <script>
+        window.toastr = {
+            success: function(message) { iziToast.success({ message: message, position: 'topRight' }); },
+            error: function(message) { iziToast.error({ message: message, position: 'topRight' }); },
+            warning: function(message) { iziToast.warning({ message: message, position: 'topRight' }); },
+            info: function(message) { iziToast.info({ message: message, position: 'topRight' }); }
+        };
+    </script>
 
         <script>
             @if (Session::has('message'))

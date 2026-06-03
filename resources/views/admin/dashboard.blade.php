@@ -32,7 +32,7 @@
                 <div class="row mb-4">
                     <!-- <div class="col-lg-6 col-md-6 col-sm-12">
                                         <a href="{{ url('admin/settings') }}" style="text-decoration: none;">
-                                            <div class="card" style="background: rgb(93, 120, 238); border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(93, 120, 238, 0.3); transition: all 0.3s; hover:transform: translateY(-5px);">
+                                            <div class="card" style="background: #FE7701; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(93, 120, 238, 0.3); transition: all 0.3s; hover:transform: translateY(-5px);">
                                                 <div style="display: flex; align-items: center;">
                                                     <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
                                                         <i class="fas fa-cog" style="color: white; font-size: 28px;"></i>
@@ -50,7 +50,7 @@
                         <div class="col-lg-6 col-md-6 col-sm-12">
                             <a href="{{ url('admin/staff') }}" style="text-decoration: none;">
                                 <div class="card"
-                                    style="background: rgb(93, 120, 238); border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(93, 120, 238, 0.3); transition: all 0.3s; hover:transform: translateY(-5px);">
+                                    style="background: #FE7701; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(93, 120, 238, 0.3); transition: all 0.3s; hover:transform: translateY(-5px);">
                                     <div style="display: flex; align-items: center;">
                                         <div
                                             style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">

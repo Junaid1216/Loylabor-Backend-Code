@@ -44,7 +44,7 @@ class SellerProductTosController extends Controller
             $returnPolicies->delete();
 
             return back()->with([
-                'message'    => __('Return policy deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {

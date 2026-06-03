@@ -431,7 +431,7 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with(['message' => __('Order status updated successfully'), 'alert-type' => 'success']);
+            return redirect()->back()->with(['message' => __('Updated successfully'), 'alert-type' => 'success']);
         } catch (Exception $e) {
             DB::rollBack();
             logError("Error updating order status", $e);
@@ -590,7 +590,7 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with(['message' => __('Order payment status updated successfully'), 'alert-type' => 'success']);
+            return redirect()->back()->with(['message' => __('Updated successfully'), 'alert-type' => 'success']);
         } catch (Exception $e) {
             DB::rollBack();
 

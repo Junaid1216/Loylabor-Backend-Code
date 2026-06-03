@@ -203,7 +203,7 @@ class LanguageController extends Controller
 
         return response()->json([
             'status' => $action,
-            'message' => $action ? __('Language Updated Successfully!') : __('Language Updating Failed!'),
+            'message' => $action ? __('Updated successfully') : __('Language Updating Failed!'),
         ]);
     }
 

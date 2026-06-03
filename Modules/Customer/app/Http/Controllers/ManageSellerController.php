@@ -373,7 +373,7 @@ class ManageSellerController extends Controller
             $address->save();
         }
 
-        $notification = __('Profile updated successfully');
+        $notification = __('Updated successfully');
 
         if (strtolower($user->email) !== strtolower($request->email) || $user->status == 'inactive') {
             try {
@@ -509,7 +509,7 @@ class ManageSellerController extends Controller
 
             DB::commit();
 
-            $notification = ['message' => __('Seller Profile deleted successfully'), 'alert-type' => 'success'];
+            $notification = ['message' => __('Deleted successfully'), 'alert-type' => 'success'];
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
             logError('User not found', $e);

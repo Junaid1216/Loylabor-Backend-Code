@@ -109,7 +109,7 @@ class SellerProductVariantController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::CREATE->value, 'seller.product.product-variant', [$product->id], [
-                'message'    => __('Product Variant created successfully'),
+                'message'    => __('Created successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -196,7 +196,7 @@ class SellerProductVariantController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::UPDATE->value, 'seller.product.product-variant', [$variant->product->id], [
-                'message'    => __('Product Variant updated successfully'),
+                'message'    => __('Updated successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -244,7 +244,7 @@ class SellerProductVariantController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::DELETE->value, 'seller.product.product-variant', [$variant->product->id], [
-                'message'    => __('Product Variant deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -290,7 +290,7 @@ class SellerProductVariantController extends Controller
             DB::commit();
 
             return back()->with([
-                'message'    => __('Product Variant deleted successfully'),
+                'message'    => __('Deleted successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {

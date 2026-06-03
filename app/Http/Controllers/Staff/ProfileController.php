@@ -86,7 +86,7 @@ class ProfileController extends Controller
             $staffUser->password = Hash::make($request->password);
             $staffUser->save();
 
-            $notification = __('Password updated successfully');
+            $notification = __('Updated successfully');
             $notification = ['message' => $notification, 'alert-type' => 'success'];
 
             return redirect()->back()->with($notification);

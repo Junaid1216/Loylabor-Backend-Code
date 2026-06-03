@@ -310,7 +310,7 @@ class CustomerController extends Controller
             $address->save();
         }
 
-        $notification = __('Profile updated successfully');
+        $notification = __('Updated successfully');
 
         if (strtolower($user->email) !== strtolower($request->email) || $user->status == 'inactive') {
             try {

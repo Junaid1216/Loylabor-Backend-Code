@@ -178,7 +178,7 @@ class StaffDashboardController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Data saved successfully',
+                'message' => 'Created successfully',
                 'draft_id' => $draft->id
             ]);
 
@@ -254,7 +254,7 @@ class StaffDashboardController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Shop created successfully!',
+                'message' => 'Created successfully',
                 'shop' => $shop
             ]);
 
@@ -333,7 +333,7 @@ class StaffDashboardController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Shop created successfully!',
+                'message' => 'Created successfully',
                 'shop' => $shop
             ]);
 

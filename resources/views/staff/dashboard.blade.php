@@ -15,7 +15,7 @@
                 <!-- Staff Dashboard Cards -->
                 <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card" style="background: rgb(93, 120, 238); border-radius: 15px; padding: 20px;">
+                        <div class="card" style="background: #FE7701; border-radius: 15px; padding: 20px;">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="color: rgba(255,255,255,0.8); font-size: 14px;">Total Shops</span>
                                 <span style="color: white; font-size: 42px; font-weight: 700;">{{ $totalShops ?? 0 }}</span>
@@ -24,7 +24,7 @@
                     </div>
                     
                     <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card" style="background: rgb(93, 120, 238); border-radius: 15px; padding: 20px;">
+                        <div class="card" style="background: #FE7701; border-radius: 15px; padding: 20px;">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="color: rgba(255,255,255,0.8); font-size: 14px;">Visited Today</span>
                                 <span style="color: white; font-size: 42px; font-weight: 700;">{{ $visitedToday ?? 0 }}</span>
@@ -33,7 +33,7 @@
                     </div>
                     
                     <div class="col-lg-4 col-md-4 col-sm-12">
-                        <div class="card" style="background: rgb(93, 120, 238); border-radius: 15px; padding: 20px;">
+                        <div class="card" style="background: #FE7701; border-radius: 15px; padding: 20px;">
                             <div style="display: flex; flex-direction: column;">
                                 <span style="color: rgba(255,255,255,0.8); font-size: 14px;">Pending Visits</span>
                                 <span style="color: white; font-size: 42px; font-weight: 700;">{{ $pendingVisits ?? 0 }}</span>
@@ -52,7 +52,7 @@
                     <div class="col-lg-3 col-md-6 col-sm-6 col-12">
                         <div class="card quick-action-card" data-action="add-shop" style="border: 1px solid #e3e3e3; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s;">
                             <div style="display: flex; align-items: center;">
-                                <div style="background: rgb(93, 120, 238); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <div style="background: #FE7701; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                     <i class="fas fa-plus" style="color: white; font-size: 20px;"></i>
                                 </div>
                                 <div>
@@ -69,7 +69,7 @@
                         <a href="{{ route('staff.shop.index') }}" class="text-decoration-none">
                             <div class="card" style="border: 1px solid #e3e3e3; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.3s;">
                                 <div style="display: flex; align-items: center;">
-                                    <div style="background: rgb(93, 120, 238); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                    <div style="background: #FE7701; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
                                         <i class="fas fa-list" style="color: white; font-size: 20px;"></i>
                                     </div>
                                     <div>
@@ -183,7 +183,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submitBtn" style="background-color: #0047d9;">Save Shop</button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" style="background-color: #FE7701;">Save Shop</button>
                     </div>
                 </form>
             </div>
@@ -460,15 +460,7 @@
                     contentType: false,
                     success: function(response) {
                         if(response.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: response.message || 'Shop created successfully!',
-                                confirmButtonColor: '#0047d9',
-                                confirmButtonText: 'OK',
-                                timer: 3000,
-                                showConfirmButton: true
-                            });
+                            toastr.success(response.message || 'Created successfully');
                             
                             $('#addShopModal').modal('hide');
                             resetForm();
@@ -517,7 +509,7 @@
                                 icon: 'error',
                                 title: 'Please fix the following errors:',
                                 html: errorHtml,
-                                confirmButtonColor: '#0047d9',
+                                confirmButtonColor: '#FE7701',
                                 confirmButtonText: 'OK'
                             });
                         } else if(xhr.status === 403) {
@@ -525,14 +517,14 @@
                                 icon: 'error',
                                 title: 'Permission Denied',
                                 text: xhr.responseJSON.message || 'You do not have permission to create shops.',
-                                confirmButtonColor: '#0047d9'
+                                confirmButtonColor: '#FE7701'
                             });
                         } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
                                 text: xhr.responseJSON?.message || 'Something went wrong. Please try again.',
-                                confirmButtonColor: '#0047d9'
+                                confirmButtonColor: '#FE7701'
                             });
                         }
                     },

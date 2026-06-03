@@ -173,13 +173,13 @@ class DashboardController extends Controller
         $action = setLanguage(request('code'));
 
         if ($action) {
-            $notification = __('Language Changed Successfully');
+            $notification = __('Updated successfully');
             $notification = ['message' => $notification, 'alert-type' => 'success'];
 
             return redirect()->back()->with($notification);
         }
 
-        $notification = __('Language Changed Successfully');
+        $notification = __('Updated successfully');
         $notification = ['message' => $notification, 'alert-type' => 'success'];
 
         return redirect()->back()->with($notification);
@@ -201,14 +201,14 @@ class DashboardController extends Controller
             session()->put('currency_icon', $currency->currency_icon);
             session()->put('currency_rate', $currency->currency_rate);
 
-            $notification = __('Currency Changed Successfully');
+            $notification = __('Updated successfully');
             $notification = ['message' => $notification, 'alert-type' => 'success'];
 
             return redirect()->back()->with($notification);
         }
 
         getSessionCurrency();
-        $notification = __('Currency Changed Successfully');
+        $notification = __('Updated successfully');
         $notification = ['message' => $notification, 'alert-type' => 'success'];
 
         return redirect()->back()->with($notification);

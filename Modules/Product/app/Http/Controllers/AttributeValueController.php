@@ -64,7 +64,7 @@ class AttributeValueController extends Controller
         );
 
         $notification = [
-            'message'    => __('Attribute value created successfully'),
+            'message'    => __('Created successfully'),
             'alert-type' => 'success',
         ];
 
@@ -119,7 +119,7 @@ class AttributeValueController extends Controller
         ]);
 
         return back()->with([
-            'message'    => __('Attribute value updated successfully'),
+            'message'    => __('Updated successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -136,7 +136,7 @@ class AttributeValueController extends Controller
         $attrValue->delete();
 
         return back()->with([
-            'message'    => __('Attribute value deleted successfully'),
+            'message'    => __('Deleted successfully'),
             'alert-type' => 'success',
         ]);
     }

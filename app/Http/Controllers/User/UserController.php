@@ -231,7 +231,7 @@ class UserController extends Controller
             $address->save();
         }
 
-        $message = __('Profile updated successfully');
+        $message = __('Updated successfully');
 
         if (strtolower($user->email) !== strtolower($request->email)) {
             DB::beginTransaction();
@@ -308,7 +308,7 @@ class UserController extends Controller
         $address->save();
 
         return redirect()->back()->with([
-            'message'    => __('Address added successfully'),
+            'message'    => __('Created successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -328,7 +328,7 @@ class UserController extends Controller
         $address->delete();
 
         return redirect()->back()->with([
-            'message'    => __('Address deleted successfully'),
+            'message'    => __('Deleted successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -346,7 +346,7 @@ class UserController extends Controller
         Session::invalidate();
 
         return to_route('website.home')->with([
-            'message'    => __('Profile deleted successfully'),
+            'message'    => __('Deleted successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -484,7 +484,7 @@ class UserController extends Controller
         );
 
         return response()->json([
-            'message'    => __('Review added successfully'),
+            'message'    => __('Created successfully'),
             'alert-type' => 'success',
         ]);
     }
@@ -504,7 +504,7 @@ class UserController extends Controller
         $review->delete();
 
         return redirect()->back()->with([
-            'message'    => __('Review deleted successfully'),
+            'message'    => __('Deleted successfully'),
             'alert-type' => 'success',
         ]);
     }

@@ -9822,7 +9822,7 @@ TRACKING ORDER START
 }
 
 /* .pro_trckr li:nth-child(1)::after {
-  background: #2a9cf5;
+  background: #FE7701;
 } */
 
 .pro_trckr li:nth-child(2)::before {
@@ -9840,7 +9840,7 @@ TRACKING ORDER START
 }
 
 .check_mark::after {
-    background: #2a9cf5 !important;
+    background: #FE7701 !important;
 }
 
 .red_mark::before {

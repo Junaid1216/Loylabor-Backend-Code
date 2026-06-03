@@ -170,7 +170,7 @@ class ShopController extends Controller
     if ($request->ajax()) {
         $response = [
             'success' => true,
-            'message' => 'Shop created successfully!',
+            'message' => 'Created successfully',
             'shop' => $shop
         ];
         
@@ -341,7 +341,7 @@ class ShopController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Photo deleted successfully!'
+                'message' => 'Deleted successfully'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -393,7 +393,7 @@ class ShopController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Primary photo updated successfully!'
+                'message' => 'Updated successfully'
             ]);
         } catch (\Exception $e) {
             \Log::error('Set primary photo error: ' . $e->getMessage());

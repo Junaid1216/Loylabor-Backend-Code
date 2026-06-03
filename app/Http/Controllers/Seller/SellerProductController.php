@@ -108,7 +108,7 @@ class SellerProductController extends Controller
             }
 
             return $this->redirectWithMessage(RedirectType::CREATE->value, 'seller.product.edit', [$product->id], [
-                'message'    => __('Product created successfully'),
+                'message'    => __('Created successfully'),
                 'alert-type' => 'success',
             ]);
 
@@ -263,7 +263,7 @@ class SellerProductController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::UPDATE->value, 'seller.product.index', [], [
-                'message'    => __('Product updated successfully'),
+                'message'    => __('Updated successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -299,7 +299,7 @@ class SellerProductController extends Controller
 
             if ($product) {
                 return $this->redirectWithMessage(RedirectType::DELETE->value, 'seller.product.index', [], [
-                    'message'    => __('Product deleted successfully'),
+                    'message'    => __('Deleted successfully'),
                     'alert-type' => 'success',
                 ]);
             } else {

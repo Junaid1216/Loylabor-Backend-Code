@@ -73,7 +73,7 @@ class ProductCategoryController extends Controller
             $category = $this->category->storeProductCategory($request);
             DB::commit();
             if ($request->ajax()) {
-                return response()->json(['message' => 'Category created successfully', 'categories' => $category, 'status' => 200], 200);
+                return response()->json(['message' => 'Created successfully', 'categories' => $category, 'status' => 200], 200);
             }
 
             return $this->redirectWithMessage(RedirectType::CREATE->value, 'admin.category.edit', ['category' => $category->id, 'code' => getSessionLanguage()]);
@@ -132,7 +132,7 @@ class ProductCategoryController extends Controller
             DB::commit();
 
             return $this->redirectWithMessage(RedirectType::UPDATE->value, 'admin.category.edit', ['category' => $id, 'code' => $code], [
-                'message'    => __('Category updated successfully'),
+                'message'    => __('Updated successfully'),
                 'alert-type' => 'success',
             ]);
         } catch (\Exception $ex) {
@@ -174,7 +174,7 @@ class ProductCategoryController extends Controller
                 ]);
             } else {
                 return $this->redirectWithMessage(RedirectType::DELETE->value, 'admin.category.index')->with([
-                    'message'    => 'Category deleted successfully',
+                    'message'    => 'Deleted successfully',
                     'alert-type' => 'success',
                 ]);
             }

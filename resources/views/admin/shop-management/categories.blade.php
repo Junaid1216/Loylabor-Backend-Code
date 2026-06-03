@@ -140,7 +140,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
-                   <button type="button" class="btn" id="confirmDeleteBtn" style="background-color: #0047d9; border-color: #0047d9; color: #fff;">
+                   <button type="button" class="btn" id="confirmDeleteBtn" style="background-color: #FE7701; border-color: #FE7701; color: #fff;">
 						
     {{ __('Yes,Delete') }}
 </button>
