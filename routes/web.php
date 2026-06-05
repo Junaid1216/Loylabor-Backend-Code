@@ -23,5 +23,14 @@ Route::get('/robots.txt', function () {
 });
 
 Route::fallback(function () {
+    if (request()->is('api') || request()->is('api/*')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'API endpoint not found. Use POST for register/login and send Accept: application/json.',
+            'path' => request()->path(),
+            'method' => request()->method(),
+        ], 404);
+    }
+
     abort(404);
 });

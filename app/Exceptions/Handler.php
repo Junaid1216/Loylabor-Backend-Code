@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Arr;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -52,6 +54,32 @@ class Handler extends ExceptionHandler
     {
         if ($exception instanceof AccessPermissionDeniedException || $exception instanceof DemoModeEnabledException) {
             return $exception->render($request);
+        }
+
+        if ($request->is('api') || $request->is('api/*')) {
+            if ($exception instanceof MethodNotAllowedHttpException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'HTTP method not allowed for this API endpoint.',
+                    'path' => $request->path(),
+                    'method' => $request->method(),
+                    'allowed' => $exception->getHeaders()['Allow'] ?? null,
+                    'hint' => str_contains($request->path(), 'register')
+                        ? 'Use POST /api/register with JSON or form-data body.'
+                        : (str_contains($request->path(), 'districts')
+                            ? 'Use GET /api/districts (POST is not supported).'
+                            : null),
+                ], 405);
+            }
+
+            if ($exception instanceof NotFoundHttpException) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'API endpoint not found.',
+                    'path' => $request->path(),
+                    'method' => $request->method(),
+                ], 404);
+            }
         }
 
         return parent::render($request, $exception);

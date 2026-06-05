@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\TechnicianAvailability;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -66,12 +67,88 @@ class TechnicianController extends Controller
         
         return response()->json([
             'documents' => [
-                'cnic' => !is_null($user->cnic_front),
+                'cnic_front' => !is_null($user->cnic_front),
+                'cnic_back' => !is_null($user->cnic_back),
                 'photo' => !is_null($user->photo),
+                'certificates' => !empty($user->certificates),
+            ],
+            'verification' => [
+                'cnic_front_verified' => (bool) $user->cnic_front_verified,
+                'cnic_back_verified' => (bool) $user->cnic_back_verified,
+                'photo_verified' => (bool) $user->photo_verified,
+                'certificates_verified' => (bool) $user->certificates_verified,
             ],
             'account_status' => $user->status,
             'subscription_active' => $user->subscription == 'active' && ($user->subscription_end > now()),
-            'subscription_end' => $user->subscription_end
+            'subscription_end' => $user->subscription_end,
+            'availability' => $user->availabilities,
+        ]);
+    }
+
+    public function updateAvailability(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->user_type != 'technician') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'availability' => 'required|array',
+            'availability.*.day' => 'required|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'availability.*.start' => 'nullable|date_format:H:i',
+            'availability.*.end' => 'nullable|date_format:H:i',
+            'availability.*.is_available' => 'boolean',
+        ]);
+
+        foreach ($request->availability as $schedule) {
+            TechnicianAvailability::updateOrCreate(
+                [
+                    'technician_id' => $user->id,
+                    'day' => $schedule['day'],
+                    'specific_date' => $schedule['specific_date'] ?? null,
+                ],
+                [
+                    'start_time' => $schedule['start'] ?? null,
+                    'end_time' => $schedule['end'] ?? null,
+                    'is_available' => $schedule['is_available'] ?? true,
+                ]
+            );
+        }
+
+        return response()->json([
+            'message' => 'Availability updated successfully',
+            'availability' => TechnicianAvailability::where('technician_id', $user->id)->get(),
+        ]);
+    }
+
+    public function toggleDayAvailability(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->user_type != 'technician') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'day' => 'required|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'is_available' => 'required|boolean',
+        ]);
+
+        $availability = TechnicianAvailability::where([
+            'technician_id' => $user->id,
+            'day' => $request->day,
+        ])->first();
+
+        if ($availability) {
+            $availability->update(['is_available' => $request->is_available]);
+        }
+
+        return response()->json([
+            'message' => $request->is_available
+                ? "Now available on {$request->day}"
+                : "Now off on {$request->day}",
+            'availability' => $availability,
         ]);
     }
 

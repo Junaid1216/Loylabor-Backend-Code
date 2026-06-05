@@ -25,17 +25,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'phone',
-        'email_verified_at',
-        'status',
-        'is_banned',
-        'verification_token',
-        'forget_password_token',
-    ];
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -54,7 +44,15 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password'          => 'hashed',
+        'password' => 'hashed',
+        'certificates' => 'array',
+        'skills' => 'array',
+        'service_area' => 'array',
+        'is_verified' => 'boolean',
+        'cnic_front_verified' => 'boolean',
+        'cnic_back_verified' => 'boolean',
+        'photo_verified' => 'boolean',
+        'certificates_verified' => 'boolean',
     ];
 
     /**
@@ -214,4 +212,32 @@ class User extends Authenticatable
     {
         return $this->hasMany(WithdrawRequest::class, 'user_id');
     }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function availabilities()
+    {
+        return $this->hasMany(TechnicianAvailability::class, 'technician_id');
+    }
+
+    public function documentUrl(?string $path, string $dummyFile): string
+    {
+        if ($path) {
+            return asset('storage/' . ltrim($path, '/'));
+        }
+
+        return asset('dummy/' . $dummyFile);
+    }
+
+    public function allDocumentsVerified(): bool
+    {
+        return $this->cnic_front_verified
+            && $this->cnic_back_verified
+            && $this->photo_verified
+            && $this->certificates_verified;
+    }
 }
+

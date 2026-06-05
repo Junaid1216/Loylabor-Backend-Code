@@ -16,17 +16,33 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
+                                        <th>Reference Code</th>
                                         <th>Customer</th>
                                         <th>Technician</th>
+                                        <th>Status</th>
                                         <th>Date/Time</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($bookings as $booking)
+                                    @forelse($bookings as $booking)
                                     <tr>
+                                        <td>
+                                            @if($booking->booking_reference)
+                                                <span class="badge badge-warning font-weight-bold" style="font-size:14px; letter-spacing:1px;">
+                                                    {{ $booking->booking_reference }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">Pending confirmation</span>
+                                            @endif
+                                        </td>
                                         <td>{{ optional($booking->customer)->name }}</td>
                                         <td>{{ optional($booking->technician)->name }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $booking->status === 'accepted' ? 'success' : ($booking->status === 'pending' ? 'warning' : 'secondary') }}">
+                                                {{ ucfirst($booking->status) }}
+                                            </span>
+                                        </td>
                                         <td>{{ $booking->service_date }} {{ $booking->time_slot }}</td>
                                         <td>
                                             <form action="{{ route('admin.bookings.destroy', $booking->id) }}" method="POST" style="display:inline;">
@@ -36,9 +52,14 @@
                                             </form>
                                         </td>
                                     </tr>
-                                    @endforeach
+                                    @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No bookings yet.</td>
+                                    </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
+                            {{ $bookings->links() }}
                         </div>
                     </div>
                 </div>

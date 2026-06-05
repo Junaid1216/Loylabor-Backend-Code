@@ -4,6 +4,8 @@
     </IfModule>
 
     RewriteEngine On
+    # Local XAMPP: /homeservices-12Mar2026/  |  Live server: /homeservices/
+    RewriteBase /homeservices-12Mar2026/
 
     # Pass Authorization header to PHP
     RewriteCond %{HTTP:Authorization} ^(.*)

@@ -136,6 +136,8 @@ Route::prefix('staff')->name('staff.')->middleware([StaffAuthMiddleware::class, 
             ->name('shop-categories.destroy');
 
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+        Route::post('users/{user}/verify-document', [\App\Http\Controllers\Admin\UserController::class, 'verifyDocument'])
+            ->name('users.verify-document');
         Route::resource('bookings', \App\Http\Controllers\Admin\BookingController::class)->only(['index', 'destroy']);
     });
 });

@@ -77,6 +77,32 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        if ($user->user_type === 'technician') {
+            $user->load('availabilities');
+        }
+
         return view('admin.users.show', compact('user'));
+    }
+
+    public function verifyDocument(Request $request, User $user)
+    {
+        $request->validate([
+            'field' => 'required|in:cnic_front,cnic_back,photo,certificates',
+        ]);
+
+        if ($user->user_type !== 'technician') {
+            return redirect()->back()->with('error', 'Only technician documents can be verified.');
+        }
+
+        $column = $request->field . '_verified';
+        $user->update([$column => true]);
+
+        if ($user->fresh()->allDocumentsVerified()) {
+            $user->update(['status' => 'active']);
+        }
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', ucfirst(str_replace('_', ' ', $request->field)) . ' marked as verified.');
     }
 }

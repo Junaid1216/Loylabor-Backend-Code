@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\User;
+use App\Support\BookingReference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
@@ -50,8 +50,6 @@ class BookingController extends Controller
             return response()->json(['error' => 'This time slot is already booked'], 400);
         }
 
-        $bookingReference = 'BKG-' . strtoupper(Str::random(6)) . '-' . date('Ymd') . '-' . rand(1000, 9999);
-
         $booking = Booking::create([
             'customer_id' => $customer->id,
             'technician_id' => $technician->id,
@@ -64,7 +62,7 @@ class BookingController extends Controller
             'city' => $request->city,
             'phone' => $request->phone ?? $customer->phone,
             'additional_notes' => $request->additional_notes,
-            'booking_reference' => $bookingReference
+            'booking_reference' => null,
         ]);
 
         // Send notification to technician (via push, sms, or email)
@@ -74,7 +72,7 @@ class BookingController extends Controller
             'success' => true,
             'message' => 'Booking request sent successfully',
             'booking' => $booking->load('customer', 'technician'),
-            'booking_reference' => $bookingReference
+            'note' => 'Reference code will be generated when technician confirms the booking.',
         ], 201);
     }
 
@@ -136,9 +134,12 @@ class BookingController extends Controller
             return response()->json(['error' => 'This time slot is no longer available'], 400);
         }
 
+        $referenceCode = $booking->booking_reference ?: BookingReference::generate();
+
         $booking->update([
             'status' => 'accepted',
-            'accepted_at' => now()
+            'accepted_at' => now(),
+            'booking_reference' => $referenceCode,
         ]);
 
         // Send notification to customer
@@ -146,8 +147,9 @@ class BookingController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Booking accepted successfully',
-            'booking' => $booking
+            'message' => 'Booking confirmed successfully',
+            'booking' => $booking->fresh(),
+            'booking_reference' => $referenceCode,
         ]);
     }
 

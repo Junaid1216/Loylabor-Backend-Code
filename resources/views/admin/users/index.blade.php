@@ -19,6 +19,7 @@
                                         <th>Name</th>
                                         <th>Email</th>
                                         <th>Type</th>
+                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -28,6 +29,12 @@
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{ ucfirst($user->user_type) }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ $user->status === 'active' ? 'success' : 'warning' }}">{{ ucfirst($user->status) }}</span>
+                                            @if($user->user_type === 'technician' && $user->allDocumentsVerified())
+                                                <span class="badge badge-info">Docs OK</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
                                             <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display:inline;">
