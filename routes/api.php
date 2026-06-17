@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DistrictController;
+use App\Http\Controllers\Api\HelpSupportController;
 use App\Http\Controllers\Api\TechnicianController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,14 +41,18 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/districts', [DistrictController::class, 'index']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-Route::get('/technicians', [TechnicianController::class, 'getTechnicians']);
 
 // Protected
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
+    Route::post('/profile/update', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    // Help & Support
+    Route::post('/help-support', [HelpSupportController::class, 'submit']);
+
     // Technician
+	Route::get('/technicians', [TechnicianController::class, 'getTechnicians']);
     Route::post('/technician/submit-verification', [TechnicianController::class, 'submitVerification']);
     Route::post('/technician/activate-subscription', [TechnicianController::class, 'activateSubscription']);
     Route::get('/technician/status', [TechnicianController::class, 'status']);
@@ -62,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings/{bookingId}/accept', [BookingController::class, 'acceptBooking']);
     Route::post('/bookings/{bookingId}/reject', [BookingController::class, 'rejectBooking']);
     Route::post('/bookings/{bookingId}/cancel', [BookingController::class, 'cancelBooking']);
+    Route::post('/bookings/{bookingId}/status', [BookingController::class, 'updateStatus']);
     Route::post('/bookings/{bookingId}/complete', [BookingController::class, 'completeBooking']);
 });
 

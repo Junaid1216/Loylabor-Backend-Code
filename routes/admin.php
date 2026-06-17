@@ -32,7 +32,7 @@ Route::get('/shops/get-draft', [\App\Http\Controllers\Admin\StaffDashboardContro
 Route::post('/shops/clear-draft', [\App\Http\Controllers\Admin\StaffDashboardController::class , 'clearDraft'])->name('staff.shops.clear-draft');
 Route::post('/shops/direct-save', [\App\Http\Controllers\Admin\StaffDashboardController::class , 'directSave'])->name('staff.shops.direct-save'); // New route
 Route::get('/clear-cache', [CacheController::class, 'clearAllCache'])->name('clear.cache');
-
+Route::post('users/verify-email/{user}', [App\Http\Controllers\Admin\UserController::class, 'verifyEmail'])->name('admin.users.verify-email');
 // Assign Permissions Direct Routes
 Route::middleware(['auth:admin'])->group(function () {
     Route::get('admin/assign-permissions', [App\Http\Controllers\Admin\RolesController::class, 'assignPermissionsForm'])->name('assign.permissions.form');
@@ -44,7 +44,7 @@ Route::middleware(['auth:admin'])->group(function () {
 if ($adminPrefix !== 'admin') {
     Route::prefix($adminPrefix)->name('admin.')->group(function () {
         Route::get('login', [AuthenticatedSessionController::class , 'create'])->name('login');
-        Route::post('store-login', [AuthenticatedSessionController::class , 'store'])->name('store-login');
+        Route::post('	', [AuthenticatedSessionController::class , 'store'])->name('store-login');
         Route::get('forgot-password', [PasswordResetLinkController::class , 'create'])->name('password.request');
         Route::post('/forget-password', [PasswordResetLinkController::class , 'custom_forget_password'])->name('forget-password');
         Route::get('reset-password/{token}', [NewPasswordController::class , 'custom_reset_password_page'])->name('password.reset');
@@ -138,7 +138,11 @@ Route::prefix('staff')->name('staff.')->middleware([StaffAuthMiddleware::class, 
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
         Route::post('users/{user}/verify-document', [\App\Http\Controllers\Admin\UserController::class, 'verifyDocument'])
             ->name('users.verify-document');
+        Route::post('users/{user}/verify-payment', [\App\Http\Controllers\Admin\UserController::class, 'verifyPayment'])
+            ->name('users.verify-payment');
         Route::resource('bookings', \App\Http\Controllers\Admin\BookingController::class)->only(['index', 'destroy']);
+        Route::get('bookings-settings', [\App\Http\Controllers\Admin\BookingController::class, 'settings'])->name('bookings.settings');
+        Route::post('bookings-settings', [\App\Http\Controllers\Admin\BookingController::class, 'updateSettings'])->name('bookings.settings.update');
     });
 });
 
@@ -184,6 +188,12 @@ Route::group(['as' => 'admin.', 'prefix' => 'admin'], function () {
 
                 // District Routes
                 Route::resource('districts', \App\Http\Controllers\Admin\DistrictController::class);
+
+                // Subscriptions Routes
+                Route::resource('subscriptions', \App\Http\Controllers\Admin\SubscriptionController::class);
+
+                // Help Supports (Complaints) Routes
+                Route::resource('help-supports', \App\Http\Controllers\Admin\HelpSupportController::class)->only(['index', 'show', 'destroy']);
                 Route::post('districts/change-status/{id}', [\App\Http\Controllers\Admin\DistrictController::class, 'changeStatus'])->name('districts.change-status');
                 Route::post('districts/bulk-delete', [\App\Http\Controllers\Admin\DistrictController::class, 'bulkDelete'])->name('districts.bulk-delete');
                 Route::get('districts/active', [\App\Http\Controllers\Admin\DistrictController::class, 'getActiveDistricts'])->name('districts.active');

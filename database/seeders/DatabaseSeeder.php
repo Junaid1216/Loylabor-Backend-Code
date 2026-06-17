@@ -84,8 +84,15 @@ class DatabaseSeeder extends Seeder
 
         // if (app()->isLocal()) {
         //     $this->call([
+        //         DummyDataSeeder::class,
         //     ]);
         // }
+
+        if (app()->isLocal()) {
+            $this->call([
+                DummyDataSeeder::class,
+            ]);
+        }
 
         // if(app()->isProduction()){
         //     $this->call([

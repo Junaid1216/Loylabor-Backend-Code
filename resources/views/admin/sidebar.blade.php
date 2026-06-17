@@ -206,6 +206,24 @@
                             <span>{{ __('Bookings') }}</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.bookings.settings*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.bookings.settings') }}">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>{{ __('Booking Settings') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.subscriptions.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.subscriptions.index') }}">
+                            <i class="fas fa-list-alt"></i>
+                            <span>{{ __('Subscriptions') }}</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.help-supports.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.help-supports.index') }}">
+                            <i class="fas fa-headset"></i>
+                            <span>{{ __('Complaints') }}</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
 

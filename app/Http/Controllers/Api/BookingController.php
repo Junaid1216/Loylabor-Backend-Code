@@ -7,9 +7,28 @@ use App\Models\User;
 use App\Support\BookingReference;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class BookingController extends Controller
 {
+    private function bookingExpiryMinutes(): int
+    {
+        $value = null;
+        try {
+            $value = getSettings('booking_request_expiry_minutes');
+        } catch (\Throwable $e) {
+            $value = null;
+        }
+
+        // getSettings($key) returns stdClass when key doesn't exist; guard it
+        if (is_object($value)) {
+            $value = null;
+        }
+
+        $minutes = (int) ($value ?: 5);
+        return $minutes < 1 ? 5 : $minutes;
+    }
+
     // Customer: Book a technician
     public function bookTechnician(Request $request)
     {
@@ -50,6 +69,8 @@ class BookingController extends Controller
             return response()->json(['error' => 'This time slot is already booked'], 400);
         }
 
+        $expiryMinutes = $this->bookingExpiryMinutes();
+
         $booking = Booking::create([
             'customer_id' => $customer->id,
             'technician_id' => $technician->id,
@@ -63,6 +84,7 @@ class BookingController extends Controller
             'phone' => $request->phone ?? $customer->phone,
             'additional_notes' => $request->additional_notes,
             'booking_reference' => null,
+            'expires_at' => Carbon::now()->addMinutes($expiryMinutes),
         ]);
 
         // Send notification to technician (via push, sms, or email)
@@ -72,7 +94,8 @@ class BookingController extends Controller
             'success' => true,
             'message' => 'Booking request sent successfully',
             'booking' => $booking->load('customer', 'technician'),
-            'note' => 'Reference code will be generated when technician confirms the booking.',
+            'expires_at' => $booking->expires_at,
+            'note' => "Request will expire in {$expiryMinutes} minutes if not accepted. Reference code will be generated when technician confirms.",
         ], 201);
     }
 
@@ -87,6 +110,13 @@ class BookingController extends Controller
 
         $status = $request->get('status', 'pending');
         
+        // Auto-expire old pending bookings
+        Booking::where('technician_id', $technician->id)
+            ->where('status', 'pending')
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<', Carbon::now())
+            ->update(['status' => 'expired']);
+
         $bookings = Booking::where('technician_id', $technician->id)
             ->when($status, function($query, $status) {
                 if ($status !== 'all') {
@@ -120,6 +150,14 @@ class BookingController extends Controller
 
         if (!$booking) {
             return response()->json(['error' => 'Booking not found or already processed'], 404);
+        }
+
+        if ($booking->expires_at && Carbon::now()->greaterThan($booking->expires_at)) {
+            $booking->update(['status' => 'expired']);
+            return response()->json([
+                'success' => false,
+                'message' => 'This request has expired. Customer must create a new request.',
+            ], 410);
         }
 
         // Check if time slot still available
@@ -194,6 +232,13 @@ class BookingController extends Controller
     {
         $customer = $request->user();
 
+        // Auto-expire my pending bookings
+        Booking::where('customer_id', $customer->id)
+            ->where('status', 'pending')
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<', Carbon::now())
+            ->update(['status' => 'expired']);
+
         $status = $request->get('status', 'all');
         
         $bookings = Booking::where('customer_id', $customer->id)
@@ -206,7 +251,10 @@ class BookingController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $bookings
+            'message' => $status === 'expired'
+                ? 'Your request expired. Please create a new request.'
+                : null,
+            'data' => $bookings,
         ]);
     }
 
@@ -254,7 +302,7 @@ class BookingController extends Controller
 
         $booking = Booking::where('id', $bookingId)
             ->where('technician_id', $technician->id)
-            ->where('status', 'accepted')
+            ->whereIn('status', ['accepted', 'on_the_way', 'work_started'])
             ->first();
 
         if (!$booking) {
@@ -269,6 +317,46 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking marked as completed'
+        ]);
+    }
+
+    // Technician: Update intermediate status
+    public function updateStatus(Request $request, $bookingId)
+    {
+        $technician = $request->user();
+
+        if ($technician->user_type !== 'technician') {
+            return response()->json(['error' => 'Only technicians can update status'], 403);
+        }
+
+        $request->validate([
+            'status' => 'required|in:on_the_way,work_started'
+        ]);
+
+        $booking = Booking::where('id', $bookingId)
+            ->where('technician_id', $technician->id)
+            ->whereIn('status', ['accepted', 'on_the_way'])
+            ->first();
+
+        if (!$booking) {
+            return response()->json(['error' => 'Booking not found or cannot be updated'], 404);
+        }
+
+        $updateData = ['status' => $request->status];
+        if ($request->status == 'on_the_way') {
+            $updateData['on_the_way_at'] = now();
+        } elseif ($request->status == 'work_started') {
+            $updateData['work_started_at'] = now();
+        }
+
+        $booking->update($updateData);
+
+        // Notify customer
+        $this->notifyCustomer($booking->customer, $booking, $request->status);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking status updated to ' . str_replace('_', ' ', $request->status)
         ]);
     }
 
@@ -289,9 +377,54 @@ class BookingController extends Controller
             return response()->json(['error' => 'Booking not found'], 404);
         }
 
+        // Generate service progress timeline
+        $timeline = [
+            [
+                'title' => 'Request Sent',
+                'status' => 'Done',
+                'time' => $booking->created_at ? $booking->created_at->format('h:i A') : null,
+                'description' => null,
+                'is_active' => in_array($booking->status, ['pending', 'accepted', 'on_the_way', 'work_started', 'completed']),
+                'is_current' => $booking->status == 'pending'
+            ],
+            [
+                'title' => 'Technician Accepted',
+                'status' => $booking->accepted_at ? 'Done' : 'Pending',
+                'time' => $booking->accepted_at ? \Carbon\Carbon::parse($booking->accepted_at)->format('h:i A') : null,
+                'description' => $booking->accepted_at ? $booking->technician->name . ' accepted your request' : null,
+                'is_active' => in_array($booking->status, ['accepted', 'on_the_way', 'work_started', 'completed']),
+                'is_current' => $booking->status == 'accepted'
+            ],
+            [
+                'title' => 'On the Way',
+                'status' => $booking->on_the_way_at ? 'Done' : ($booking->status == 'accepted' ? 'In Progress' : 'Pending'),
+                'time' => $booking->on_the_way_at ? \Carbon\Carbon::parse($booking->on_the_way_at)->format('h:i A') : null,
+                'description' => null,
+                'is_active' => in_array($booking->status, ['on_the_way', 'work_started', 'completed']),
+                'is_current' => $booking->status == 'on_the_way'
+            ],
+            [
+                'title' => 'Work Started',
+                'status' => $booking->work_started_at ? 'Done' : ($booking->status == 'on_the_way' ? 'In Progress' : 'Pending'),
+                'time' => $booking->work_started_at ? \Carbon\Carbon::parse($booking->work_started_at)->format('h:i A') : null,
+                'description' => $booking->work_started_at ? null : 'Pending technician arrival',
+                'is_active' => in_array($booking->status, ['work_started', 'completed']),
+                'is_current' => $booking->status == 'work_started'
+            ],
+            [
+                'title' => 'Completed',
+                'status' => $booking->completed_at ? 'Done' : ($booking->status == 'work_started' ? 'In Progress' : 'Pending'),
+                'time' => $booking->completed_at ? \Carbon\Carbon::parse($booking->completed_at)->format('h:i A') : null,
+                'description' => $booking->completed_at ? null : 'Service completion pending',
+                'is_active' => $booking->status == 'completed',
+                'is_current' => $booking->status == 'completed'
+            ]
+        ];
+
         return response()->json([
             'success' => true,
-            'data' => $booking
+            'data' => $booking,
+            'service_progress' => $timeline
         ]);
     }
 

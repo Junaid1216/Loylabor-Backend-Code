@@ -237,7 +237,13 @@ class User extends Authenticatable
         return $this->cnic_front_verified
             && $this->cnic_back_verified
             && $this->photo_verified
-            && $this->certificates_verified;
+            && $this->certificates_verified
+            && $this->payment_status === 'verified';
+    }
+
+    public function subscriptionPlan()
+    {
+        return $this->belongsTo(Subscription::class, 'subscription_id');
     }
 }
 

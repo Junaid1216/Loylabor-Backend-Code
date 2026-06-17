@@ -78,7 +78,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         if ($user->user_type === 'technician') {
-            $user->load('availabilities');
+            $user->load(['availabilities', 'subscriptionPlan']);
         }
 
         return view('admin.users.show', compact('user'));
@@ -105,4 +105,63 @@ class UserController extends Controller
             ->route('admin.users.show', $user)
             ->with('success', ucfirst(str_replace('_', ' ', $request->field)) . ' marked as verified.');
     }
+
+    public function verifyPayment(Request $request, User $user)
+    {
+        if ($user->user_type !== 'technician') {
+            return redirect()->back()->with('error', 'Only technician payments can be verified.');
+        }
+
+        $request->validate([
+            'payment_screenshot' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        ]);
+
+        $data = [
+            'payment_status' => 'verified',
+            'subscription' => 'active'
+        ];
+
+        if ($request->hasFile('payment_screenshot')) {
+            $path = $request->file('payment_screenshot')->store('payments', 'public');
+            $data['payment_screenshot'] = $path;
+        }
+
+        $user->update($data);
+
+        if ($user->fresh()->allDocumentsVerified()) {
+            $user->update(['status' => 'active']);
+        }
+
+        return redirect()
+            ->route('admin.users.show', $user)
+            ->with('success', 'Payment verified successfully. Subscription is now active.');
+    }
+
+	public function verifyEmail(Request $request, User $user)
+{
+    try {
+        // Check if already verified
+        if ($user->is_verified == 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email is already verified!'
+            ]);
+        }
+        
+        // Update is_verified to 1
+        $user->is_verified = 1;
+        $user->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Email verified successfully for ' . $user->name
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to verify email: ' . $e->getMessage()
+        ]);
+    }
+}
 }

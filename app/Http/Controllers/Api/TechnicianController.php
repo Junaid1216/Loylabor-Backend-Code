@@ -27,7 +27,6 @@ class TechnicianController extends Controller
         return response()->json(['message' => 'Documents submitted for review', 'status' => $user->status]);
     }
 
-    // Activate subscription (after verification)
     public function activateSubscription(Request $request)
     {
         $user = $request->user();
@@ -41,21 +40,23 @@ class TechnicianController extends Controller
         }
 
         $request->validate([
-            'plan' => 'required|in:basic,premium',
-            'payment_method' => 'required'
+            'subscription_id' => 'required|exists:subscriptions,id',
+            'payment_method' => 'required',
+            'payment_screenshot' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
+
+        $path = $request->file('payment_screenshot')->store('payments', 'public');
+        $subscription = \App\Models\Subscription::find($request->subscription_id);
 
         $user->update([
-            'subscription' => 'active',
-            'subscription_end' => now()->addDays(30)
+            'subscription_id' => $subscription->id,
+            'payment_screenshot' => $path,
+            'payment_status' => 'pending',
+            'subscription_end' => now()->addMonths($subscription->duration_months)
         ]);
 
-        if ($user->status == 'review') {
-            $user->update(['status' => 'active']);
-        }
-
         return response()->json([
-            'message' => 'Subscription activated. Account is now LIVE!',
+            'message' => 'Payment screenshot uploaded. Waiting for admin verification.',
             'subscription_end' => $user->subscription_end
         ]);
     }
@@ -63,7 +64,7 @@ class TechnicianController extends Controller
     // Get technician status
     public function status(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load('subscriptionPlan');
         
         return response()->json([
             'documents' => [
@@ -79,8 +80,16 @@ class TechnicianController extends Controller
                 'certificates_verified' => (bool) $user->certificates_verified,
             ],
             'account_status' => $user->status,
+            'payment_status' => $user->payment_status ?? 'none',
             'subscription_active' => $user->subscription == 'active' && ($user->subscription_end > now()),
             'subscription_end' => $user->subscription_end,
+            'subscription_plan' => $user->subscriptionPlan ? [
+                'id' => $user->subscriptionPlan->id,
+                'name' => $user->subscriptionPlan->name,
+                'permissions' => is_array($user->subscriptionPlan->features)
+                    ? $user->subscriptionPlan->features
+                    : explode(',', $user->subscriptionPlan->features ?? ''),
+            ] : null,
             'availability' => $user->availabilities,
         ]);
     }
@@ -171,6 +180,31 @@ class TechnicianController extends Controller
             'category' => $request->category ?? 'all',
             'total' => $technicians->count(),
             'data' => $technicians
+        ]);
+    }
+
+    public function getSubscriptions()
+    {
+        $subscriptions = \App\Models\Subscription::where('is_active', 1)->get()->map(function($sub) {
+            $features = is_array($sub->features) ? $sub->features : json_decode($sub->features, true);
+            if (!is_array($features)) {
+                $features = explode(',', $sub->features);
+            }
+            
+            return [
+                'id' => $sub->id,
+                'name' => $sub->name,
+                'duration_months' => $sub->duration_months,
+                'price_pkr' => $sub->price_pkr,
+                'discount_percent' => $sub->discount_percent,
+                'tax_percent' => $sub->tax_percent,
+                'features' => $features
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $subscriptions
         ]);
     }
 

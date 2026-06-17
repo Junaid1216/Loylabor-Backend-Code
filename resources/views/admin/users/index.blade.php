@@ -30,10 +30,28 @@
                                         <td>{{ $user->email }}</td>
                                         <td>{{ ucfirst($user->user_type) }}</td>
                                         <td>
-                                            <span class="badge badge-{{ $user->status === 'active' ? 'success' : 'warning' }}">{{ ucfirst($user->status) }}</span>
+                                            @php
+                                                // Determine status display
+                                                $displayStatus = $user->status;
+                                                $badgeColor = 'warning';
+                                                
+                                                if($user->user_type === 'customer' && !$user->is_verified) {
+                                                    $displayStatus = 'pending';
+                                                    $badgeColor = 'warning';
+                                                } elseif($user->status === 'active') {
+                                                    $badgeColor = 'success';
+                                                } elseif($user->status === 'inactive') {
+                                                    $badgeColor = 'danger';
+                                                } elseif($user->status === 'pending') {
+                                                    $badgeColor = 'warning';
+                                                }
+                                            @endphp
+                                            <span class="badge badge-{{ $badgeColor }}">{{ ucfirst($displayStatus) }}</span>
+                                            
                                             @if($user->user_type === 'technician' && $user->allDocumentsVerified())
                                                 <span class="badge badge-info">Docs OK</span>
                                             @endif
+                                            
                                         </td>
                                         <td>
                                             <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
