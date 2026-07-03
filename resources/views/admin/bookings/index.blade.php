@@ -45,11 +45,7 @@
                                         </td>
                                         <td>{{ $booking->service_date }} {{ $booking->time_slot }}</td>
                                         <td>
-                                            <form action="{{ route('admin.bookings.destroy', $booking->id) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')"><i class="fa fa-trash"></i></button>
-                                            </form>
+                                            <a class="btn btn-danger btn-sm deleteForm" href="javascript:;" data-url="{{ route('admin.bookings.destroy', $booking->id) }}"><i class="fa fa-trash"></i></a>
                                         </td>
                                     </tr>
                                     @empty
@@ -68,3 +64,7 @@
     </section>
 </div>
 @endsection
+
+@push('js')
+    @include('admin.partials.system-records-toast')
+@endpush

@@ -38,14 +38,14 @@
                                     <th>{{ __('Saving Price (PKR)') }}</th>
                                     <td>{{ $subscription->saving_price ? number_format($subscription->saving_price, 2) : __('N/A') }}</td>
                                 </tr>
-                                <tr>
+                                <!-- <tr>
                                     <th>{{ __('Discount %') }}</th>
                                     <td>{{ $subscription->discount_percent ?? 0 }}%</td>
                                 </tr>
                                 <tr>
                                     <th>{{ __('Tax %') }}</th>
                                     <td>{{ $subscription->tax_percent ?? 0 }}%</td>
-                                </tr>
+                                </tr> -->
                                 <tr>
                                     <th>{{ __('Status') }}</th>
                                     <td>

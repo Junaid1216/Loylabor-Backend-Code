@@ -18,24 +18,34 @@ class HelpSupportController extends Controller
             'priority' => 'required|in:low,medium,high'
         ]);
 
-        $path = null;
-        if ($request->hasFile('screenshot')) {
-            $path = $request->file('screenshot')->store('support', 'public');
+        try {
+            $path = null;
+            if ($request->hasFile('screenshot')) {
+                $path = $request->file('screenshot')->store('support', 'public');
+            }
+
+            $helpSupport = HelpSupport::create([
+                'user_id' => $request->user()->id,
+                'booking_id' => $request->booking_id,
+                'issue_category' => $request->issue_category,
+                'description' => $request->description,
+                'screenshot' => $path,
+                'priority' => $request->priority,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Your complaint has been submitted successfully. We will get back to you soon.',
+                'data' => $helpSupport
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Help support submit failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to submit complaint. Please try again later.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
         }
-
-        $helpSupport = HelpSupport::create([
-            'user_id' => $request->user()->id,
-            'booking_id' => $request->booking_id,
-            'issue_category' => $request->issue_category,
-            'description' => $request->description,
-            'screenshot' => $path,
-            'priority' => $request->priority,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Your complaint has been submitted successfully. We will get back to you soon.',
-            'data' => $helpSupport
-        ]);
     }
 }

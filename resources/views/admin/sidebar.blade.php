@@ -200,7 +200,7 @@
                             <span>{{ __('Users') }}</span>
                         </a>
                     </li>
-                    <li class="{{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
+                    <li class="{{ request()->routeIs('admin.bookings.index', 'admin.bookings.destroy') ? 'active' : '' }}">
                         <a href="{{ route('admin.bookings.index') }}">
                             <i class="fas fa-calendar-check"></i>
                             <span>{{ __('Bookings') }}</span>

@@ -9,6 +9,8 @@ class HelpSupport extends Model
 {
     use HasFactory;
 
+    protected $table = 'help_supports';
+
     protected $fillable = [
         'user_id',
         'booking_id',

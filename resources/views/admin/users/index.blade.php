@@ -13,6 +13,18 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="type_filter">{{ __('Filter by Type') }}</label>
+                                        <select id="type_filter" class="form-control select2">
+                                            <option value="">{{ __('All') }}</option>
+                                            <option value="user" @selected(request('type') === 'user')>{{ __('Users') }}</option>
+                                            <option value="technician" @selected(request('type') === 'technician')>{{ __('Technicians') }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -28,7 +40,7 @@
                                     <tr>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
-                                        <td>{{ ucfirst($user->user_type) }}</td>
+                                        <td>{{ $user->user_type === 'customer' ? 'User' : ucfirst($user->user_type) }}</td>
                                         <td>
                                             @php
                                                 // Determine status display
@@ -55,16 +67,15 @@
                                         </td>
                                         <td>
                                             <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-info btn-sm"><i class="fa fa-eye"></i></a>
-                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')"><i class="fa fa-trash"></i></button>
-                                            </form>
+                                            <a class="btn btn-danger btn-sm deleteForm" href="javascript:;" data-url="{{ route('admin.users.destroy', $user->id) }}"><i class="fa fa-trash"></i></a>
                                         </td>
                                     </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+                            <div class="float-right">
+                                {{ $users->links() }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -73,3 +84,31 @@
     </section>
 </div>
 @endsection
+
+@push('js')
+    @include('admin.partials.system-records-toast')
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: "{{ __('Search type...') }}",
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: Infinity
+            });
+
+            $('#type_filter').on('change', function() {
+                var type = $(this).val();
+                var url = new URL(window.location.href);
+
+                if (type === '') {
+                    url.searchParams.delete('type');
+                } else {
+                    url.searchParams.set('type', type);
+                }
+
+                url.searchParams.delete('page');
+                window.location.href = url.toString();
+            });
+        });
+    </script>
+@endpush

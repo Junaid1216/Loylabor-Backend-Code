@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\TechnicianAvailability;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class TechnicianController extends Controller
 {
@@ -161,25 +163,62 @@ class TechnicianController extends Controller
         ]);
     }
 
-	 public function getTechnicians(Request $request)
+    public function getTechnicians(Request $request)
     {
         $query = User::where('user_type', 'technician')
-                    ->where('status', 'active')
-                    ->where('subscription', 'active')
-                    ->where('subscription_end', '>', now());
-        
-        // Category filter - agar category di hai to filter, nahi to sab
-        if ($request->has('category') && $request->category != '') {
+            ->where('status', 'active')
+            ->where('is_verified', true);
+
+        if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
-        
-        $technicians = $query->with('district')->get();
-        
+
+        if ($request->filled('district_id')) {
+            $query->where('district_id', $request->district_id);
+        }
+
+        $technicians = $query->with(['district', 'availabilities'])->get()->map(function ($tech) {
+            $skills = $tech->skills;
+            if (is_string($skills)) {
+                $skills = json_decode($skills, true) ?? [];
+            }
+
+            return [
+                'id' => $tech->id,
+                'name' => $tech->name,
+                'email' => $tech->email,
+                'phone' => $tech->phone,
+                'photo' => $tech->photo ? asset($tech->photo) : null,
+                'bio' => $tech->bio,
+                'experience' => $tech->experience,
+                'skills' => $skills ?? [],
+                'service_area' => $tech->service_area ?? [],
+                'district' => $tech->district ? [
+                    'id' => $tech->district->id,
+                    'name' => $tech->district->name,
+                ] : null,
+                'availability' => $tech->availabilities->map(function ($avail) {
+                    return [
+                        'day' => $avail->day,
+                        'start_time' => $avail->start_time,
+                        'end_time' => $avail->end_time,
+                        'is_available' => (bool) $avail->is_available,
+                    ];
+                }),
+                'rating' => Schema::hasTable('reviews')
+                    ? round((float) DB::table('reviews')
+                        ->where('technician_id', $tech->id)
+                        ->where('is_approved', 1)
+                        ->avg('rating'), 1)
+                    : 0,
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'category' => $request->category ?? 'all',
             'total' => $technicians->count(),
-            'data' => $technicians
+            'data' => $technicians,
         ]);
     }
 

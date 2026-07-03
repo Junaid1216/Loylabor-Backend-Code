@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Modules\GlobalSetting\app\Models\Setting;
 
 class BookingController extends Controller
 {
@@ -44,10 +46,19 @@ class BookingController extends Controller
             'booking_request_expiry_minutes' => 'required|integer|min:1|max:1440',
         ]);
 
-        \Modules\GlobalSetting\app\Models\Setting::updateOrCreate(
-            ['key' => 'booking_request_expiry_minutes'],
-            ['value' => (string) $request->booking_request_expiry_minutes]
-        );
+        $minutes = (string) $request->booking_request_expiry_minutes;
+        $setting = Setting::where('key', 'booking_request_expiry_minutes')->first();
+
+        if ($setting) {
+            $setting->update(['value' => $minutes]);
+        } else {
+            $setting = new Setting();
+            $setting->key = 'booking_request_expiry_minutes';
+            $setting->value = $minutes;
+            $setting->save();
+        }
+
+        Cache::forget('setting');
 
         return redirect()
             ->route('admin.bookings.settings')

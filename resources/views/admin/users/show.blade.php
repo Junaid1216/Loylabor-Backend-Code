@@ -107,7 +107,8 @@
                                                     <small class="text-muted d-block">{{ __('Ends') }}: {{ $user->subscription_end }}</small>
                                                 @endif
                                                 @if($user->payment_status !== 'verified')
-                                                    <button type="button" class="btn btn-sm btn-primary ml-2 mt-1" data-bs-toggle="modal" data-bs-target="#verifyPaymentModal">
+                                                    <button type="button" class="btn btn-sm btn-primary ml-2 mt-1 verify-payment-btn"
+                                                            data-url="{{ route('admin.users.verify-payment', $user->id) }}">
                                                         <i class="fas fa-check-circle"></i> Verify
                                                     </button>
                                                 @endif
@@ -115,18 +116,6 @@
                                                 <span class="text-warning">{{ __('Plan ID') }}: {{ $user->subscription_id }} ({{ __('plan not found') }})</span>
                                             @else
                                                 <span class="text-muted">N/A</span>
-                                            @endif
-                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Payment Screenshot</th>
-                                        <td colspan="3">
-                                            @if($user->payment_screenshot)
-                                                <a href="{{ asset('storage/' . $user->payment_screenshot) }}" target="_blank">
-                                                    <img src="{{ asset('storage/' . $user->payment_screenshot) }}" width="120" class="rounded border">
-                                                </a>
-                                            @else
-                                                <span class="text-muted">No screenshot uploaded</span>
                                             @endif
                                          </td>
                                     </tr>
@@ -274,75 +263,77 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="card border">
-                                            <div class="card-header d-flex justify-content-between align-items-center">
-                                                <strong>Certificates</strong>
-                                                @include('admin.users.partials.verify-button', ['field' => 'certificates', 'verified' => $user->certificates_verified])
-                                            </div>
-                                            <div class="card-body text-center">
-                                                @php
-                                                    $certFiles = $user->certificates;
-                                                    if (is_string($certFiles)) {
-                                                        $certFiles = json_decode($certFiles, true);
-                                                    }
-                                                    $certFiles = is_array($certFiles) ? $certFiles : [];
-                                                    $firstCert = count($certFiles) > 0 ? $certFiles[0] : null;
-                                                    
-                                                    if ($firstCert) {
-                                                        if (!str_starts_with($firstCert, 'http') && !str_starts_with($firstCert, 'backend/')) {
-                                                            $certUrl = asset('storage/' . $firstCert);
-                                                        } elseif (str_starts_with($firstCert, 'backend/')) {
-                                                            $certUrl = asset($firstCert);
-                                                        } else {
-                                                            $certUrl = asset($firstCert);
-                                                        }
-                                                    } else {
-                                                        $certUrl = asset('backend/img/sample-certificate.pdf');
-                                                    }
-                                                    
-                                                    $totalCertificates = count($certFiles);
-                                                @endphp
-                                                <div class="p-3 bg-light rounded">
-                                                    <i class="fas fa-file-pdf fa-3x text-danger"></i>
-                                                    <p class="mb-2 mt-2">
-                                                        <strong>Technician {{ $totalCertificates > 1 ? 'Certificates (' . $totalCertificates . ')' : 'Certificate' }}</strong>
-                                                    </p>
-                                                    
-                                                    @if($totalCertificates > 1)
-                                                        <div class="dropdown mb-2">
-                                                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                                                View All Certificates ({{ $totalCertificates }})
-                                                            </button>
-                                                            <div class="dropdown-menu">
-                                                                @foreach($certFiles as $index => $cert)
-                                                                    @php
-                                                                        if (!str_starts_with($cert, 'http') && !str_starts_with($cert, 'backend/')) {
-                                                                            $certLink = asset('storage/' . $cert);
-                                                                        } elseif (str_starts_with($cert, 'backend/')) {
-                                                                            $certLink = asset($cert);
-                                                                        } else {
-                                                                            $certLink = asset($cert);
-                                                                        }
-                                                                    @endphp
-                                                                    <a class="dropdown-item" href="{{ $certLink }}" target="_blank">
-                                                                        Certificate #{{ $index + 1 }}
-                                                                    </a>
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                    
-                                                    <a href="{{ $certUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fa fa-eye"></i> {{ $totalCertificates > 1 ? 'View First Certificate' : 'View Certificate' }}
-                                                    </a>
-                                                    
-                                                    @if(!$firstCert)
-                                                        <p class="text-muted small mt-2 mb-0">Sample certificate (dummy PDF)</p>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+    <div class="card border">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>Certificates</strong>
+            @include('admin.users.partials.verify-button', ['field' => 'certificates', 'verified' => $user->certificates_verified])
+        </div>
+        <div class="card-body text-center">
+            @php
+                $certFiles = $user->certificates;
+                if (is_string($certFiles)) {
+                    $certFiles = json_decode($certFiles, true);
+                }
+                $certFiles = is_array($certFiles) ? $certFiles : [];
+                $firstCert = count($certFiles) > 0 ? $certFiles[0] : null;
+                $totalCertificates = count($certFiles); // <-- THIS MUST BE DEFINED HERE
+                
+                // Helper function to properly generate URL with /public/
+                function getPublicUrl($path) {
+                    if (empty($path)) {
+                        return asset('backend/img/sample-certificate.pdf');
+                    }
+                    
+                    // If it's already a full URL, return as is
+                    if (str_starts_with($path, 'http')) {
+                        return $path;
+                    }
+                    
+                    // Remove any leading slashes or public/ storage/ prefixes
+                    $path = ltrim($path, '/');
+                    $path = preg_replace('/^(public\/|storage\/)/', '', $path);
+                    
+                    // If path doesn't start with backend/, add it
+                    if (!str_starts_with($path, 'backend/')) {
+                        $path = 'backend/' . $path;
+                    }
+                    
+                    // Use url() helper with public path
+                    return url('public/' . $path);
+                }
+            @endphp
+            <div class="p-3 bg-light rounded">
+                <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                <p class="mb-2 mt-2">
+                    <strong>Technician {{ $totalCertificates > 1 ? 'Certificates (' . $totalCertificates . ')' : 'Certificate' }}</strong>
+                </p>
+                
+                @if($totalCertificates > 1)
+                    <div class="dropdown mb-2">
+                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                            View All Certificates ({{ $totalCertificates }})
+                        </button>
+                        <div class="dropdown-menu">
+                            @foreach($certFiles as $index => $cert)
+                                <a class="dropdown-item" href="{{ getPublicUrl($cert) }}" target="_blank">
+                                    Certificate #{{ $index + 1 }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+                
+                <a href="{{ getPublicUrl($firstCert) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="fa fa-eye"></i> {{ $totalCertificates > 1 ? 'View First Certificate' : 'View Certificate' }}
+                </a>
+                
+                @if(!$firstCert)
+                    <p class="text-muted small mt-2 mb-0">Sample certificate (dummy PDF)</p>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
                                 </div>
                             @endif
                         </div>
@@ -351,57 +342,19 @@
             </div>
         </div>
     </section>
-<!-- Verify Payment Modal -->
-<div class="modal fade" id="verifyPaymentModal" tabindex="-1" aria-labelledby="verifyPaymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <form action="{{ route('admin.users.verify-payment', $user->id) }}" method="POST" enctype="multipart/form-data">
-          @csrf
-          <div class="modal-header">
-            <h5 class="modal-title" id="verifyPaymentModalLabel">Verify Subscription Payment</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p>Please upload the payment screenshot to verify the subscription plan.</p>
-            <div class="form-group">
-                <label>Payment Screenshot <span class="text-danger">*</span></label>
-                <input type="file" name="payment_screenshot" class="form-control" accept="image/*" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success"><i class="fa fa-check"></i> Verify Payment</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 </div>
 @endsection
 
 @push('js')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@include('admin.partials.system-records-toast')
 <script>
 $(document).ready(function() {
-    // Toast function
     function showToast(message, type = 'success') {
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-        });
-        
-        Toast.fire({
-            icon: type,
-            title: message
-        });
+        if (type === 'success') {
+            toastr.success(message);
+        } else {
+            toastr.error(message);
+        }
     }
     
     // Verify document button click for technicians
@@ -420,15 +373,18 @@ $(document).ready(function() {
         $.ajax({
             url: url,
             type: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             data: {
-                user_id: userId,
                 field: field,
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
                 if (response.success) {
                     showToast(response.message, 'success');
-                    $btn.replaceWith('<span class="badge badge-success"><i class="fas fa-check-circle"></i> Verified</span>');
+                    $btn.replaceWith('<button type="button" class="btn btn-success btn-sm" disabled><i class="fa fa-check"></i> Verified</button>');
                     
                     if (response.status_updated) {
                         setTimeout(function() {
@@ -466,8 +422,11 @@ $(document).ready(function() {
         $.ajax({
             url: url,
             type: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             data: {
-                user_id: userId,
                 _token: '{{ csrf_token() }}'
             },
             success: function(response) {
@@ -480,7 +439,49 @@ $(document).ready(function() {
                     // Update the email verified status display
                     $('th:contains("Email Verified")').next('td').html('<span class="badge badge-success"><i class="fas fa-check-circle"></i> Verified</span>');
                     
-                    // Reload page after 2 seconds to reflect all changes
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showToast(response.message, 'error');
+                    $btn.html(originalHtml).prop('disabled', false);
+                }
+            },
+            error: function(xhr) {
+                let message = 'Something went wrong!';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                }
+                showToast(message, 'error');
+                $btn.html(originalHtml).prop('disabled', false);
+            }
+        });
+    });
+
+    // Subscription payment verify
+    $(document).on('click', '.verify-payment-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const $btn = $(this);
+        const url = $btn.data('url');
+        const originalHtml = $btn.html();
+
+        $btn.html('<i class="fas fa-spinner fa-spin"></i> Verifying...').prop('disabled', true);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
                     setTimeout(function() {
                         location.reload();
                     }, 1500);

@@ -41,6 +41,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/districts', [DistrictController::class, 'index']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::get('/technicians', [TechnicianController::class, 'getTechnicians']);
 
 // Protected
 Route::middleware('auth:sanctum')->group(function () {
@@ -52,7 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/help-support', [HelpSupportController::class, 'submit']);
 
     // Technician
-	Route::get('/technicians', [TechnicianController::class, 'getTechnicians']);
     Route::post('/technician/submit-verification', [TechnicianController::class, 'submitVerification']);
     Route::post('/technician/activate-subscription', [TechnicianController::class, 'activateSubscription']);
     Route::get('/technician/status', [TechnicianController::class, 'status']);

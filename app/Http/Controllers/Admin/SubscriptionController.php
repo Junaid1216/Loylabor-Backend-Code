@@ -32,7 +32,7 @@ class SubscriptionController extends Controller
 {
     $request->validate([
         'name' => 'required|string|max:100',
-        'duration_months' => 'required|integer|min:1',
+        'duration_months' => 'nullable|integer|min:1',
         'price_pkr' => 'required|numeric|min:0',
         'saving_price' => 'nullable|numeric|min:0',
         'features' => 'nullable|string',
@@ -45,7 +45,7 @@ class SubscriptionController extends Controller
 
     Subscription::create([
         'name' => $request->name,
-        'duration_months' => (int) $request->duration_months,
+        'duration_months' => (int) ($request->duration_months ?? 1),
         'price_pkr' => $request->price_pkr,
         'saving_price' => $request->saving_price ?? 0,
         'features' => $featuresArray,
@@ -80,18 +80,25 @@ class SubscriptionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'duration_months' => 'required|integer|min:1',
+            'duration_months' => 'nullable|integer|min:1',
             'price_pkr' => 'required|numeric|min:0',
+            'saving_price' => 'nullable|numeric|min:0',
             'features' => 'nullable|string',
             'discount_percent' => 'nullable|integer|min:0|max:100',
             'tax_percent' => 'nullable|integer|min:0|max:100',
             'is_active' => 'required|in:0,1',
         ]);
 
-        $data = $request->all();
-        $data['is_active'] = (int) $request->is_active;
-        $data['features'] = $request->features ? array_values(array_filter(array_map('trim', explode("\n", $request->features)))) : [];
-        $subscription->update($data);
+        $subscription->update([
+            'name' => $request->name,
+            'duration_months' => (int) ($request->duration_months ?? $subscription->duration_months ?? 1),
+            'price_pkr' => $request->price_pkr,
+            'saving_price' => $request->saving_price ?? $subscription->saving_price ?? 0,
+            'features' => $request->features ? array_values(array_filter(array_map('trim', explode("\n", $request->features)))) : [],
+            'discount_percent' => $request->discount_percent ?? $subscription->discount_percent ?? 0,
+            'tax_percent' => $request->tax_percent ?? $subscription->tax_percent ?? 10,
+            'is_active' => (int) $request->is_active,
+        ]);
 
         return redirect()->route('admin.subscriptions.index')->with('success', 'Subscription plan updated successfully.');
     }

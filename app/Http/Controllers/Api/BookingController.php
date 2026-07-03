@@ -145,11 +145,24 @@ class BookingController extends Controller
 
         $booking = Booking::where('id', $bookingId)
             ->where('technician_id', $technician->id)
-            ->where('status', 'pending')
             ->first();
 
         if (!$booking) {
-            return response()->json(['error' => 'Booking not found or already processed'], 404);
+            return response()->json(['error' => 'Booking not found for this technician'], 404);
+        }
+
+        if ($booking->status === 'expired') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This request has expired. Customer must create a new request.',
+            ], 410);
+        }
+
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'error' => 'Booking already processed',
+                'status' => $booking->status,
+            ], 409);
         }
 
         if ($booking->expires_at && Carbon::now()->greaterThan($booking->expires_at)) {
@@ -164,8 +177,8 @@ class BookingController extends Controller
         $existingAccepted = Booking::where('technician_id', $technician->id)
             ->where('service_date', $booking->service_date)
             ->where('time_slot', $booking->time_slot)
-            ->whereIn('status', ['accepted', 'pending'])
-            ->where('id', '!=', $bookingId)
+            ->whereIn('status', ['accepted', 'on_the_way', 'work_started'])
+            ->where('id', '!=', $booking->id)
             ->exists();
 
         if ($existingAccepted) {
@@ -178,6 +191,7 @@ class BookingController extends Controller
             'status' => 'accepted',
             'accepted_at' => now(),
             'booking_reference' => $referenceCode,
+            'expires_at' => null,
         ]);
 
         // Send notification to customer
@@ -186,7 +200,7 @@ class BookingController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Booking confirmed successfully',
-            'booking' => $booking->fresh(),
+            'booking' => $booking->fresh()->load('customer', 'technician'),
             'booking_reference' => $referenceCode,
         ]);
     }
@@ -206,16 +220,30 @@ class BookingController extends Controller
 
         $booking = Booking::where('id', $bookingId)
             ->where('technician_id', $technician->id)
-            ->where('status', 'pending')
             ->first();
 
         if (!$booking) {
-            return response()->json(['error' => 'Booking not found or already processed'], 404);
+            return response()->json(['error' => 'Booking not found for this technician'], 404);
+        }
+
+        if ($booking->status === 'expired') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This request has already expired.',
+            ], 410);
+        }
+
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'error' => 'Booking already processed',
+                'status' => $booking->status,
+            ], 409);
         }
 
         $booking->update([
             'status' => 'rejected',
-            'cancellation_reason' => $request->reason ?? 'Rejected by technician'
+            'cancellation_reason' => $request->reason ?? 'Rejected by technician',
+            'expires_at' => null,
         ]);
 
         // Notify customer
@@ -269,11 +297,17 @@ class BookingController extends Controller
 
         $booking = Booking::where('id', $bookingId)
             ->where('customer_id', $customer->id)
-            ->whereIn('status', ['pending', 'accepted'])
             ->first();
 
         if (!$booking) {
-            return response()->json(['error' => 'Booking not found or cannot be cancelled'], 404);
+            return response()->json(['error' => 'Booking not found'], 404);
+        }
+
+        if (!in_array($booking->status, ['pending', 'accepted'], true)) {
+            return response()->json([
+                'error' => 'Booking cannot be cancelled',
+                'status' => $booking->status,
+            ], 409);
         }
 
         $booking->update([

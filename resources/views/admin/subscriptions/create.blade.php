@@ -28,9 +28,10 @@
                                         <input type="text" id="name" class="form-control" name="name" value="{{ old('name') }}" placeholder="e.g., Basic Plan, Premium Plan" required>
                                     </div>
                                     
-                                    <div class="form-group col-12 col-md-6">
-                                        <label>{{ __('Duration (Months)') }} <span class="text-danger">*</span></label>
-                                        <input type="number" id="duration_months" class="form-control" name="duration_months" value="{{ old('duration_months', 1) }}" required min="1">
+                                    <div class="form-group col-12">
+                                        <label>{{ __('Duration') }} <span class="text-danger">*</span></label>
+                                        <input type="number" id="duration_months" class="form-control" name="duration_months" value="{{ old('duration_months', 1) }}" required min="1" placeholder="e.g., 1, 3, 6, 12">
+                                        <small class="text-muted">{{ __('How long this plan stays active after purchase') }}</small>
                                     </div>
 
                                     <div class="form-group col-12 col-md-6">
@@ -43,7 +44,7 @@
                                         <input type="number" step="0.01" id="saving_price" class="form-control" name="saving_price" value="{{ old('saving_price') }}" placeholder="e.g., 4000" min="0">
                                     </div>
 
-                                    <div class="form-group col-12 col-md-6">
+                                    <!-- <div class="form-group col-12 col-md-6">
                                         <label>{{ __('Discount %') }}</label>
                                         <input type="number" id="discount_percent" class="form-control" name="discount_percent" value="{{ old('discount_percent', 0) }}" min="0" max="100">
                                     </div>
@@ -51,7 +52,7 @@
                                     <div class="form-group col-12 col-md-6">
                                         <label>{{ __('Tax %') }}</label>
                                         <input type="number" id="tax_percent" class="form-control" name="tax_percent" value="{{ old('tax_percent', 10) }}" min="0" max="100">
-                                    </div>
+                                    </div> -->
                                     
                                     <div class="form-group col-12">
                                         <label>{{ __('Features') }} <span class="text-danger">*</span></label>
@@ -184,6 +185,7 @@
 @endpush
 
 @push('js')
+@include('admin.partials.system-records-toast')
 <script>
     $(document).ready(function() {
         let features = [];
@@ -239,24 +241,12 @@
             const feature = $('#featureInput').val().trim();
             
             if (feature === '') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Empty Feature',
-                    text: 'Please enter a feature first!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                toastr.warning('Please enter a feature first!');
                 return;
             }
             
             if (features.includes(feature)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Duplicate Feature',
-                    text: 'This feature already exists!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                toastr.error('This feature already exists!');
                 return;
             }
             

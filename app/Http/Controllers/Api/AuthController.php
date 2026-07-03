@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Models\TechnicianAvailability;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Stripe\Review;
 
 class AuthController extends Controller
 {
@@ -307,14 +311,74 @@ private function getDefaultAvailability(): array
             'token' => $user->createToken('auth')->plainTextToken,
         ]);
     }
+public function profile(Request $request)
+{
+    try {
+        $user = $request->user();
 
-    public function profile(Request $request)
-    {
-        $user = $request->user()->load(['district', 'availabilities', 'subscriptionPlan']);
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized'
+            ], 401);
+        }
 
-        $response = $user->toArray();
+        $user->load(['district', 'availabilities', 'subscriptionPlan']);
 
+        // =============================================
+        // BASE RESPONSE
+        // =============================================
+        $response = [
+            'id' => $user->id,
+            'user_type' => $user->user_type,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'photo' => $user->photo ? asset($user->photo) : null,
+            'address' => $user->address ?? 'Not added',
+            'city' => $user->city ?? 'N/A',
+
+            // ✅ Email Verified Status (Common for both)
+            'email_verified' => $user->is_verified ? 'verified' : 'pending',
+
+            'personal_info' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'company' => $user->company ?? 'N/A',
+                'position' => $user->position ?? ($user->user_type === 'technician' ? $user->bio : 'Customer'),
+            ],
+        ];
+
+        // =============================================
+        // TECHNICIAN
+        // =============================================
         if ($user->user_type === 'technician') {
+
+            // Booking Stats
+            $bookingStats = DB::table('bookings')
+                ->where('technician_id', $user->id)
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+                ')
+                ->first();
+
+            // Reviews Count
+            $reviewsCount = DB::table('reviews')
+                ->where('technician_id', $user->id)
+                ->where('is_approved', 1)
+                ->count();
+
+            $response['stats'] = [
+                'total_bookings' => $bookingStats->total ?? 0,
+                'completed' => $bookingStats->completed ?? 0,
+                'pending' => $bookingStats->pending ?? 0,
+                'reviews' => $reviewsCount,
+            ];
+
             $response['verifications'] = [
                 'cnic_front' => $user->cnic_front_verified ? 'verified' : 'pending',
                 'cnic_back' => $user->cnic_back_verified ? 'verified' : 'pending',
@@ -323,22 +387,117 @@ private function getDefaultAvailability(): array
                 'subscription' => $user->payment_status === 'verified' ? 'verified' : 'pending',
             ];
 
+            $response['availability'] = $user->availabilities->map(function ($avail) {
+                return [
+                    'day' => ucfirst($avail->day),
+                    'start_time' => $avail->start_time,
+                    'end_time' => $avail->end_time,
+                    'is_available' => $avail->is_available,
+                ];
+            });
+
+            // Subscription Plan
             if ($user->payment_status === 'verified' && $user->subscriptionPlan) {
                 $plan = $user->subscriptionPlan;
                 $features = $plan->features;
                 if (is_string($features)) {
                     $features = json_decode($features, true) ?? explode(',', $features);
                 }
-                $response['verified_subscription'] = [
+                $response['subscription_plan'] = [
                     'name' => $plan->name,
+                    'duration_months' => $plan->duration_months,
+                    'price_pkr' => $plan->price_pkr,
+                    'saving_price' => $plan->saving_price,
+                    'discount_percent' => $plan->discount_percent,
                     'features' => $features ?? [],
+                    'status' => 'active',
+                    'expires_at' => $user->subscription_end,
                 ];
+            } else {
+                $response['subscription_plan'] = null;
             }
+
+            $response['district_name'] = $user->district->name ?? 'N/A';
         }
 
-        return response()->json($response);
-    }
+        // =============================================
+        // CUSTOMER
+        // =============================================
+        if ($user->user_type === 'customer') {
 
+            // Booking Stats
+            $bookingStats = DB::table('bookings')
+                ->where('customer_id', $user->id)
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
+                    SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = "cancelled" THEN 1 ELSE 0 END) as cancelled
+                ')
+                ->first();
+
+            // Reviews Count
+            $reviewsCount = DB::table('reviews')
+                ->where('customer_id', $user->id)
+                ->where('is_approved', 1)
+                ->count();
+
+            $response['stats'] = [
+                'total_bookings' => $bookingStats->total ?? 0,
+                'completed' => $bookingStats->completed ?? 0,
+                'pending' => $bookingStats->pending ?? 0,
+                'reviews' => $reviewsCount,
+            ];
+
+            $response['recent_bookings'] = DB::table('bookings')
+                ->join('users as technicians', 'bookings.technician_id', '=', 'technicians.id')
+                ->where('bookings.customer_id', $user->id)
+                ->orderBy('bookings.created_at', 'desc')
+                ->limit(10)
+                ->select(
+                    'bookings.id',
+                    'bookings.booking_reference',
+                    'bookings.status',
+                    'bookings.service_date',
+                    'bookings.total_amount',
+                    'bookings.payment_status',
+                    'bookings.created_at',
+                    'technicians.name as technician_name',
+                    'technicians.photo as technician_photo'
+                )
+                ->get()
+                ->map(function ($booking) {
+                    return [
+                        'id' => $booking->id,
+                        'booking_reference' => $booking->booking_reference,
+                        'status' => $booking->status,
+                        'service_date' => $booking->service_date,
+                        'total_amount' => $booking->total_amount,
+                        'payment_status' => $booking->payment_status,
+                        'technician_name' => $booking->technician_name ?? 'N/A',
+                        'technician_photo' => $booking->technician_photo ? asset($booking->technician_photo) : null,
+                        'created_at' => $booking->created_at,
+                    ];
+                });
+
+            $response['district_name'] = $user->district->name ?? 'N/A';
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Profile fetched successfully',
+            'data' => $response
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Profile Error: ' . $e->getMessage());
+        return response()->json([
+            'status' => false,
+            'message' => 'Server Error',
+            'error' => config('app.debug') ? $e->getMessage() : null
+        ], 500);
+    }
+}
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -354,21 +513,29 @@ private function getDefaultAvailability(): array
 
         $user = User::where('email', $request->email)->first();
 
-        $token = Str::random(60);
+        $otp = (string) rand(100000, 999999);
         $user->update([
-            'reset_password_token' => $token,
+            'otp' => $otp,
+            'reset_password_token' => null,
             'reset_token_expires_at' => now()->addMinutes(30),
         ]);
 
-        $resetLink = url("/api/reset-password?token={$token}&email={$request->email}");
-
-        // Mail::send('emails.reset-password', ['resetLink' => $resetLink, 'name' => $user->name], function ($mail) use ($request) {
-        //     $mail->to($request->email)->subject('Reset Your Password');
-        // });
+        try {
+            Mail::raw(
+                "Hello {$user->name},\n\nYour password reset OTP is: {$otp}\n\nThis code expires in 30 minutes.\n\nIf you did not request this, please ignore this email.",
+                function ($mail) use ($request) {
+                    $mail->to($request->email)
+                         ->subject('Password Reset OTP - Home Services');
+                }
+            );
+            Log::info('Password reset OTP email sent to: ' . $request->email);
+        } catch (\Exception $e) {
+            Log::error('Password reset OTP email failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Password reset link sent to your email',
+            'message' => 'OTP sent to your email',
         ]);
     }
 
@@ -376,21 +543,22 @@ private function getDefaultAvailability(): array
     {
         $request->validate([
             'email' => 'required|email|exists:users',
-            'token' => 'required|string',
+            'otp' => 'required|string',
             'password' => 'required|min:6',
         ]);
 
         $user = User::where('email', $request->email)
-            ->where('reset_password_token', $request->token)
+            ->where('otp', $request->otp)
             ->where('reset_token_expires_at', '>', now())
             ->first();
 
         if (!$user) {
-            return response()->json(['error' => 'Invalid or expired token'], 400);
+            return response()->json(['error' => 'Invalid or expired OTP'], 400);
         }
 
         $user->update([
             'password' => Hash::make($request->password),
+            'otp' => null,
             'reset_password_token' => null,
             'reset_token_expires_at' => null,
         ]);

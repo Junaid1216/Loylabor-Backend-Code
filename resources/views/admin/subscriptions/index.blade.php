@@ -58,11 +58,7 @@
                                                 <a class="btn btn-primary btn-sm" href="{{ route('admin.subscriptions.edit', $plan->id) }}">
                                                     <i class="fa fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('admin.subscriptions.destroy', $plan->id) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Are you sure?') }}');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
-                                                </form>
+                                                <a class="btn btn-danger btn-sm deleteForm" href="javascript:;" data-url="{{ route('admin.subscriptions.destroy', $plan->id) }}"><i class="fa fa-trash"></i></a>
                                             </td>
                                         </tr>
                                         @endforeach
@@ -84,3 +80,7 @@
     </section>
 </div>
 @endsection
+
+@push('js')
+    @include('admin.partials.system-records-toast')
+@endpush

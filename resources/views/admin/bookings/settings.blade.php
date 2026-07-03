@@ -16,10 +16,6 @@
         </div>
 
         <div class="section-body">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-
             <div class="row">
                 <div class="col-12 col-md-8">
                     <div class="card">
@@ -55,4 +51,8 @@
     </section>
 </div>
 @endsection
+
+@push('js')
+    @include('admin.partials.system-records-toast')
+@endpush
 

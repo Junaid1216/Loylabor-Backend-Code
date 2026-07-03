@@ -55,11 +55,7 @@
                                                 <td>{{ $complaint->created_at->format('d M, Y') }}</td>
                                                 <td>
                                                     <a href="{{ route('admin.help-supports.show', $complaint->id) }}" class="btn btn-primary btn-sm"><i class="fa fa-eye"></i></a>
-                                                    <form action="{{ route('admin.help-supports.destroy', $complaint->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this complaint?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
-                                                    </form>
+                                                    <a class="btn btn-danger btn-sm deleteForm" href="javascript:;" data-url="{{ route('admin.help-supports.destroy', $complaint->id) }}"><i class="fa fa-trash"></i></a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -77,3 +73,7 @@
     </section>
 </div>
 @endsection
+
+@push('js')
+    @include('admin.partials.system-records-toast')
+@endpush
